@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42 Weight & Balance Calculator</title>
+<title>DA42NG Weight & Balance Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
@@ -195,8 +195,8 @@
 
 <div class="container">
   <header>
-    <h1>DA42 Weight & Balance</h1>
-    <p>JA224T Load Sheet Calculation</p>
+    <h1>DA42NG Weight & Balance</h1>
+    <p>Test run</p>
   </header>
 
   <form id="wbForm" onsubmit="return false;">
@@ -269,9 +269,9 @@
           <td class="calc-cell" id="cargo_extend_mom">0</td>
         </tr>
         <tr>
-          <td class="left-text">De-ice Fluid</td>
+          <td class="left-text">De-ice Fluid (gal)</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="deice_weight" placeholder="lbs"></td>
+          <td class="input-cell"><input type="number" id="deice_weight" placeholder="0"></td>
           <td class="fixed-cell">39.4</td>
           <td class="calc-cell" id="deice_mom">0</td>
         </tr>
@@ -285,7 +285,7 @@
 
         <tr>
           <td class="left-text">Main Fuel on Board</td>
-          <td class="input-cell"><input type="number" id="fuel_main_gal" placeholder="gal"></td>
+          <td class="input-cell"><input type="number" id="fuel_main_gal" placeholder="0"></td>
           <td class="calc-cell" id="fuel_main_weight">0</td>
           <td class="fixed-cell">103.5</td>
           <td class="calc-cell" id="fuel_main_mom">0</td>
