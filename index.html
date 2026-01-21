@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator (Final Precision)</title>
+<title>DA42NG Weight & Balance Calculator (Pixel Perfect Replica)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -21,7 +21,7 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: var(--bg-color);
     margin: 0;
     padding: 20px;
@@ -44,7 +44,6 @@
   }
 
   header h1 { margin: 0; color: var(--primary-color); font-size: 22px; }
-  header p { margin: 5px 0 0; font-size: 13px; color: var(--text-sub); }
 
   .wb-table {
     width: 100%;
@@ -90,18 +89,20 @@
   .status-ok { color: var(--safe-color); font-weight: bold; }
   .status-alert { color: var(--alert-color); font-weight: bold; }
 
-  /* エンベロープの縦横比をPDF図面と同じ視認性に調整 */
+  /* エンベロープのアスペクト比を図面と同期 */
   .chart-wrapper {
     width: 100%;
-    max-width: 650px; /* 図面のプロットエリアに近い幅 */
+    max-width: 680px;
     margin: 40px auto 0;
     position: relative;
+    border: 1px solid #ccc;
+    background: white;
   }
   
   .chart-container {
     position: relative;
     width: 100%;
-    padding-bottom: 115%; /* 縦横比の再現 (幅6:高さ11.5の比率をベースに調整) */
+    padding-bottom: 75%; /* 図面のプロットエリアの横長比率を再現 */
     height: 0;
   }
 
@@ -112,18 +113,14 @@
     width: 100%;
     height: 100%;
   }
-
-  @media (max-width: 600px) {
-    .container { padding: 15px; }
-  }
 </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>DA42NG Weight & Balance</h1>
-    <p>JA224T Configuration (Full Accuracy Envelope Reconstruction)</p>
+    <h1>DA42NG Weight & Balance Calculator</h1>
+    <p>JA224T Configuration (Precision Envelope Replica)</p>
   </header>
 
   <form id="wbForm">
@@ -131,10 +128,10 @@
       <thead>
         <tr>
           <th class="left-align">Position</th>
-          <th style="width: 60px;">Qty<br>(gal)</th>
-          <th style="width: 90px;">Weight<br>(lbs)</th>
-          <th style="width: 70px;">Arm<br>(in)</th>
-          <th>Moment<br>(in-lbs)</th>
+          <th style="width: 60px;">Qty</th>
+          <th style="width: 90px;">Weight (lbs)</th>
+          <th style="width: 70px;">Arm (in)</th>
+          <th>Moment (in-lbs)</th>
         </tr>
       </thead>
       <tbody>
@@ -291,15 +288,15 @@
 document.addEventListener('DOMContentLoaded', function() {
   const ctx = document.getElementById('wbChart').getContext('2d');
   
-  // AFM MAM 42-198 および図面に基づく精密なエンベロープ座標 
+  // PDF図面とAFMデータに基づき、左縦線の長さと左斜線の開始位置を完全修正
   const envelopeData = [
-    {x: 92.52, y: 3197},  // 左下端 (1450kg / 3197lbs)
-    {x: 92.52, y: 3748},  // 前方限界屈曲点 (1700kg / 3748lbsまで垂直)
-    {x: 94.61, y: 4189},  // 前方上限 (Max TOW / 1900kg)
-    {x: 97.64, y: 4189},  // 後方上限
-    {x: 97.64, y: 3748},  // 後方限界屈曲点
-    {x: 96.46, y: 3197},  // 右下端 (3197lbsにおける後方限界)
-    {x: 92.52, y: 3197}   // ループ閉じる
+    {x: 92.52, y: 3197},  // 左下端
+    {x: 92.52, y: 3252},  // 左側垂直線 (3252 lbs / 1475 kg までの極短区間)
+    {x: 94.61, y: 4189},  // 左斜線（前方限界）の終点
+    {x: 97.64, y: 4189},  // 上辺（最大離陸重量）
+    {x: 97.64, y: 3748},  // 右側垂直線（1700 kg までの垂直区間）
+    {x: 96.46, y: 3197},  // 右下端
+    {x: 92.52, y: 3197}   // 閉じる
   ];
 
   const chart = new Chart(ctx, {
@@ -309,21 +306,21 @@ document.addEventListener('DOMContentLoaded', function() {
         {
           label: 'Envelope',
           data: envelopeData,
-          showLine: true, borderColor: '#000', borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0, z: 5
+          showLine: true, borderColor: '#000', borderWidth: 2, pointRadius: 0, fill: false, tension: 0, z: 5
         },
         {
           label: 'Max Zero Fuel',
-          data: [{x: 92.5, y: 3900}, {x: 97.64, y: 3900}],
-          showLine: true, borderColor: 'red', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0
+          data: [{x: 92, y: 3900}, {x: 98, y: 3900}],
+          showLine: true, borderColor: 'red', borderDash: [5, 3], borderWidth: 1, pointRadius: 0
         },
         {
           label: 'MAX Landing Weight',
-          data: [{x: 92.5, y: 3979}, {x: 97.64, y: 3979}],
-          showLine: true, borderColor: 'green', borderDash: [2, 2], borderWidth: 1.5, pointRadius: 0
+          data: [{x: 92, y: 3979}, {x: 98, y: 3979}],
+          showLine: true, borderColor: 'green', borderDash: [2, 2], borderWidth: 1, pointRadius: 0
         },
         {
           label: 'Flight States',
-          data: [], backgroundColor: 'blue', pointRadius: 7, pointHoverRadius: 9, z: 10
+          data: [], backgroundColor: 'blue', pointRadius: 6, pointHoverRadius: 8, z: 10
         }
       ]
     },
@@ -332,33 +329,44 @@ document.addEventListener('DOMContentLoaded', function() {
       maintainAspectRatio: false,
       scales: {
         x: { 
-          type: 'linear', position: 'bottom', 
-          min: 92.0, max: 98.0, // 図面と同じ範囲 [cite: 70, 73]
-          ticks: { stepSize: 0.5, font: { weight: 'bold' } },
-          grid: { color: '#ccc', lineWidth: 1 },
-          title: { display: true, text: 'C.G. Inches Aft of Datum', font: { size: 14, weight: 'bold' } } 
+          min: 92.0, max: 98.0, 
+          grid: { color: '#e0e0e0', lineWidth: 1, drawBorder: true },
+          ticks: {
+            stepSize: 0.5,
+            callback: function(value) {
+                // PDFの通り 92, 94, 96, 98 のみラベル表示
+                return [92, 94, 96, 98].includes(value) ? value : '';
+            },
+            font: { size: 12, weight: 'bold' }
+          },
+          title: { display: true, text: 'C.G. Inches Aft of Datum', font: { size: 13, weight: 'bold' } } 
         },
         y: { 
-          min: 3100, max: 4250, // 図面と同じ範囲 [cite: 64, 69]
-          ticks: { stepSize: 100, font: { weight: 'bold' } },
-          grid: { color: '#ccc', lineWidth: 1 },
-          title: { display: true, text: 'Weight (lbs)', font: { size: 14, weight: 'bold' } } 
+          min: 3100, max: 4200, 
+          grid: { color: '#e0e0e0', lineWidth: 1, drawBorder: true },
+          ticks: {
+            stepSize: 100,
+            callback: function(value) {
+                // PDFの通り 3100, 3300... と200刻みでラベル表示
+                return [3100, 3300, 3500, 3700, 3900, 4100].includes(value) ? value : '';
+            },
+            font: { size: 12, weight: 'bold' }
+          },
+          title: { display: true, text: 'Weight (lbs)', font: { size: 13, weight: 'bold' } } 
         }
       },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (context) => {
-              const label = context.raw.label || '';
-              return label + ": (" + context.raw.x.toFixed(2) + " in, " + context.raw.y.toFixed(1) + " lbs)";
-            }
+            label: (context) => context.raw.label + ": (" + context.raw.x.toFixed(2) + ", " + context.raw.y.toFixed(0) + ")"
           }
         }
       }
     }
   });
 
+  // 計算ロジック（変更なし）
   function getV(id) { return parseFloat(document.getElementById(id).value) || 0; }
   function setT(id, val, dec = 0) { 
     const el = document.getElementById(id);
@@ -378,19 +386,15 @@ document.addEventListener('DOMContentLoaded', function() {
       {w: getV('cc_w'), a: 153.1, id: 'cc_m'},
       {w: getV('ce_w'), a: 178.7, id: 'ce_m'}
     ];
-    let payloadW = 0, payloadM = 0;
+    let pW = 0, pM = 0;
     items.forEach(i => {
-      const m = i.w * i.a;
-      setT(i.id, m, 0);
-      payloadW += i.w;
-      payloadM += m;
+      const m = i.w * i.a; setT(i.id, m, 0); pW += i.w; pM += m;
     });
 
     const diW = getV('di_g') * 9.2, diM = diW * 39.4;
     setT('di_w', diW, 1); setT('di_m', diM, 0);
 
-    const zfwW = bw + payloadW + diW;
-    const zfwM = bm + payloadM + diM;
+    const zfwW = bw + pW + diW, zfwM = bm + pM + diM;
     const zfwCG = zfwW > 0 ? zfwM / zfwW : 0;
     setT('zfw_w', zfwW, 1); setT('zfw_m', zfwM, 0); setT('zfw_cg', zfwCG, 2);
 
@@ -399,8 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const afW = getV('af_g') * 7.01, afM = afW * 126.0;
     setT('af_w', afW, 1); setT('af_m', afM, 0);
 
-    const towW = zfwW + mfW + afW - 7.01;
-    const towM = zfwM + mfM + afM - 726;
+    const towW = zfwW + mfW + afW - 7.01, towM = zfwM + mfM + afM - 726;
     const towCG = towW > 0 ? towM / towW : 0;
     setT('tow_w', towW, 1); setT('tow_m', towM, 0); setT('tow_cg', towCG, 2);
 
@@ -409,8 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const affW = getV('aff_g') * 7.01, affM = affW * 104.5;
     setT('aff_w', -affW, 1); setT('aff_m', -affM, 0);
 
-    const lwW = towW - mffW - affW;
-    const lwM = towM - mffM - affM;
+    const lwW = towW - mffW - affW, lwM = towM - mffM - affM;
     const lwCG = lwW > 0 ? lwM / lwW : 0;
     setT('lw_w', lwW, 1); setT('lw_m', lwM, 0); setT('lw_cg', lwCG, 2);
 
@@ -419,12 +421,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
 
     const ts = document.getElementById('res_tow_status');
-    if(towW > 4189) { ts.innerText = "OVERWEIGHT!"; ts.className = "status-alert"; }
-    else { ts.innerText = "Within Limits"; ts.className = "status-ok"; }
+    ts.innerText = towW > 4189 ? "OVERWEIGHT!" : "Within Limits";
+    ts.className = towW > 4189 ? "status-alert" : "status-ok";
 
     const ls = document.getElementById('res_lw_status');
-    if(lwW > 3979) { ls.innerText = "OVERWEIGHT!"; ls.className = "status-alert"; }
-    else { ls.innerText = "Within Limits"; ls.className = "status-ok"; }
+    ls.innerText = lwW > 3979 ? "OVERWEIGHT!" : "Within Limits";
+    ls.className = lwW > 3979 ? "status-alert" : "status-ok";
 
     chart.data.datasets[3].data = [
       {x: zfwCG, y: zfwW, label: 'ZFW'},
