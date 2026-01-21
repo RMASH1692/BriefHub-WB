@@ -11,10 +11,10 @@
     --card-bg: #ffffff;
     --text-main: #1a1a1a;
     --text-sub: #666666;
-    
+
     /* 色設定 */
     --input-bg: #fff9c4; /* 入力欄：明るい黄色 */
-    --calc-bg: #ffffff;  /* 計算結果：白 */
+    --calc-bg: #ffffff;  /* 計算結果：白（変更箇所） */
     --border-color: #ddd;
     --alert-color: #d32f2f;
     --safe-color: #388e3c;
@@ -86,7 +86,7 @@
   .input-cell {
     background-color: var(--input-bg);
     width: 100px;
-    padding: 0;
+    padding: 0; /* paddingを0にしてinputを広げる */
   }
 
   .input-cell input {
@@ -98,30 +98,18 @@
     font-size: 15px;
     font-weight: bold;
     color: #000;
-    padding: 10px 12px;
+    padding: 10px 12px; /* tdのpaddingに合わせる */
     box-sizing: border-box;
     outline: none;
   }
-  
+
   .input-cell input:focus {
-    background-color: #fff59d;
+    background-color: #fff59d; /* フォーカス時に少し濃く */
   }
-  
+
   .input-cell input::placeholder {
     color: #aaa;
     font-weight: normal;
-  }
-
-  /* 数値入力のスピンボタン（矢印）を消す設定 */
-  /* Chrome, Safari, Edge, Opera */
-  input::-webkit-outer-spin-button,
-  input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  /* Firefox */
-  input[type=number] {
-    -moz-appearance: textfield;
   }
 
   /* 計算結果セル（白背景・太字） */
@@ -144,7 +132,7 @@
     color: #333;
     border-top: 2px solid #aaa;
   }
-  
+
   /* 左寄せテキスト */
   .left-text {
     text-align: left !important;
@@ -208,7 +196,7 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance</h1>
-    <p>JA224T Load Sheet Calculation</p>
+    <p>Test run</p>
   </header>
 
   <form id="wbForm" onsubmit="return false;">
@@ -230,7 +218,7 @@
           <td class="input-cell"><input type="number" id="bew_arm" value="94.7" step="0.01"></td>
           <td class="calc-cell" id="bew_mom">0</td>
         </tr>
-        
+
         <tr>
           <td class="left-text">Pilot</td>
           <td>-</td>
@@ -262,21 +250,21 @@
         <tr>
           <td class="left-text">Cargo Nose</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_nose_weight" value="5"></td>
+          <td class="input-cell"><input type="number" id="cargo_nose_weight" placeholder="0"></td>
           <td class="fixed-cell">23.6</td>
           <td class="calc-cell" id="cargo_nose_mom">0</td>
         </tr>
         <tr>
           <td class="left-text">Cargo Cabin</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_cabin_weight" value="20"></td>
+          <td class="input-cell"><input type="number" id="cargo_cabin_weight" placeholder="0"></td>
           <td class="fixed-cell">153.1</td>
           <td class="calc-cell" id="cargo_cabin_mom">0</td>
         </tr>
         <tr>
           <td class="left-text">Cargo Extend</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_extend_weight" value="2"></td>
+          <td class="input-cell"><input type="number" id="cargo_extend_weight" placeholder="0"></td>
           <td class="fixed-cell">178.7</td>
           <td class="calc-cell" id="cargo_extend_mom">0</td>
         </tr>
@@ -325,19 +313,12 @@
         </tr>
 
         <tr>
-          <td class="left-text">Main Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="flight_main_gal" placeholder="0"></td>
-          <td class="calc-cell" id="flight_main_weight">0</td>
+          <td class="left-text">Trip Fuel</td>
+          <td class="input-cell"><input type="number" id="trip_fuel_gal" placeholder="gal"></td>
+          <td class="input-cell"><input type="number" id="trip_fuel_gal" placeholder="0"></td>
+          <td class="calc-cell" id="trip_fuel_weight">0</td>
           <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="flight_main_mom">0</td>
-        </tr>
-
-        <tr>
-          <td class="left-text">AUX Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="flight_aux_gal" placeholder="0"></td>
-          <td class="calc-cell" id="flight_aux_weight">0</td>
-          <td class="fixed-cell">104.5</td>
-          <td class="calc-cell" id="flight_aux_mom">0</td>
+          <td class="calc-cell" id="trip_fuel_mom">0</td>
         </tr>
 
         <tr class="section-row">
@@ -405,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Get Inputs
     const bewWeight = getVal('bew_weight');
     const bewArm = getVal('bew_arm');
-    
+
     const w = {
       pilot: getVal('pilot_weight'),
       front: getVal('pax_front_weight'),
@@ -417,21 +398,14 @@ document.addEventListener('DOMContentLoaded', function() {
       deice: getVal('deice_weight')
     };
 
-    // Fuel Inputs
     const galMain = getVal('fuel_main_gal');
     const galAux = getVal('fuel_aux_gal');
-    
-    // Flight Fuel Inputs
-    const galFlightMain = getVal('flight_main_gal');
-    const galFlightAux = getVal('flight_aux_gal');
+    const galTrip = getVal('trip_fuel_gal');
 
-    // Calculate Weights (gal * 7.01)
     const wFuel = {
       main: galMain * FUEL_DENSITY,
       aux: galAux * FUEL_DENSITY,
-      // Flight burn is negative weight
-      burnMain: galFlightMain * FUEL_DENSITY * -1,
-      burnAux: galFlightAux * FUEL_DENSITY * -1
+      trip: galTrip * FUEL_DENSITY * -1 // Burned fuel (negative weight)
     };
 
     // 2. Calculate Moments
@@ -447,12 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
       deice: w.deice * ARMS.deice,
       fuelMain: wFuel.main * ARMS.fuelMain,
       fuelAux: wFuel.aux * ARMS.fuelAux,
-      
-      // Flight Burn Moments (Arm defined in PDF)
-      [cite_start]// Main Flight Burn Arm: 103.5 [cite: 232]
-      [cite_start]// Aux Flight Burn Arm: 104.5 [cite: 232]
-      burnMain: wFuel.burnMain * 103.5,
-      burnAux: wFuel.burnAux * 104.5
+      trip: wFuel.trip * ARMS.fuelMain
     };
 
     // Update Display (Moments & Fuel Weights)
@@ -470,12 +439,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('fuel_main_mom', m.fuelMain);
     setHtml('fuel_aux_weight', wFuel.aux, 1);
     setHtml('fuel_aux_mom', m.fuelAux);
-    
-    // Flight Fuel Rows
-    setHtml('flight_main_weight', wFuel.burnMain, 1);
-    setHtml('flight_main_mom', m.burnMain);
-    setHtml('flight_aux_weight', wFuel.burnAux, 1);
-    setHtml('flight_aux_mom', m.burnAux);
+    setHtml('trip_fuel_weight', wFuel.trip, 1);
+    setHtml('trip_fuel_mom', m.trip);
 
     // 3. Subtotals
     // Zero Fuel Weight
@@ -496,9 +461,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('tow_cg', towCG, 2);
     setHtml('tow_mom', towMom);
 
-    // Landing Weight (TOW + Burn(negative))
-    const ldgWeight = towWeight + wFuel.burnMain + wFuel.burnAux;
-    const ldgMom = towMom + m.burnMain + m.burnAux;
+    // Landing Weight
+    const ldgWeight = towWeight + wFuel.trip;
+    const ldgMom = towMom + m.trip;
     const ldgCG = ldgWeight > 0 ? ldgMom / ldgWeight : 0;
 
     setHtml('ldg_weight', ldgWeight, 1);
@@ -541,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const inputs = document.querySelectorAll('input');
   inputs.forEach(input => {
     input.addEventListener('input', calculate);
-    input.addEventListener('change', calculate);
+    input.addEventListener('change', calculate); // Ensure changes like arrow keys also trigger
   });
 
   // Initial Calculation
