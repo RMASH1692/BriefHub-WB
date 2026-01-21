@@ -14,7 +14,7 @@
     
     /* 色設定 */
     --input-bg: #fff9c4; /* 入力欄：明るい黄色 */
-    --calc-bg: #ffffff;  /* 計算結果：白（変更箇所） */
+    --calc-bg: #ffffff;  /* 計算結果：白 */
     --border-color: #ddd;
     --alert-color: #d32f2f;
     --safe-color: #388e3c;
@@ -86,7 +86,7 @@
   .input-cell {
     background-color: var(--input-bg);
     width: 100px;
-    padding: 0; /* paddingを0にしてinputを広げる */
+    padding: 0;
   }
 
   .input-cell input {
@@ -98,18 +98,30 @@
     font-size: 15px;
     font-weight: bold;
     color: #000;
-    padding: 10px 12px; /* tdのpaddingに合わせる */
+    padding: 10px 12px;
     box-sizing: border-box;
     outline: none;
   }
   
   .input-cell input:focus {
-    background-color: #fff59d; /* フォーカス時に少し濃く */
+    background-color: #fff59d;
   }
   
   .input-cell input::placeholder {
     color: #aaa;
     font-weight: normal;
+  }
+
+  /* 数値入力のスピンボタン（矢印）を消す設定 */
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
   }
 
   /* 計算結果セル（白背景・太字） */
@@ -196,7 +208,7 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance</h1>
-    <p>Test run</p>
+    <p>JA224T Load Sheet Calculation</p>
   </header>
 
   <form id="wbForm" onsubmit="return false;">
@@ -250,21 +262,21 @@
         <tr>
           <td class="left-text">Cargo Nose</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_nose_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="cargo_nose_weight" value="5"></td>
           <td class="fixed-cell">23.6</td>
           <td class="calc-cell" id="cargo_nose_mom">0</td>
         </tr>
         <tr>
           <td class="left-text">Cargo Cabin</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_cabin_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="cargo_cabin_weight" value="20"></td>
           <td class="fixed-cell">153.1</td>
           <td class="calc-cell" id="cargo_cabin_mom">0</td>
         </tr>
         <tr>
           <td class="left-text">Cargo Extend</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_extend_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="cargo_extend_weight" value="2"></td>
           <td class="fixed-cell">178.7</td>
           <td class="calc-cell" id="cargo_extend_mom">0</td>
         </tr>
@@ -313,11 +325,19 @@
         </tr>
 
         <tr>
-          <td class="left-text">Trip Fuel</td>
-          <td class="input-cell"><input type="number" id="trip_fuel_gal" placeholder="0"></td>
-          <td class="calc-cell" id="trip_fuel_weight">0</td>
+          <td class="left-text">Main Fuel for Flight</td>
+          <td class="input-cell"><input type="number" id="flight_main_gal" placeholder="0"></td>
+          <td class="calc-cell" id="flight_main_weight">0</td>
           <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="trip_fuel_mom">0</td>
+          <td class="calc-cell" id="flight_main_mom">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">AUX Fuel for Flight</td>
+          <td class="input-cell"><input type="number" id="flight_aux_gal" placeholder="0"></td>
+          <td class="calc-cell" id="flight_aux_weight">0</td>
+          <td class="fixed-cell">104.5</td>
+          <td class="calc-cell" id="flight_aux_mom">0</td>
         </tr>
 
         <tr class="section-row">
@@ -397,14 +417,21 @@ document.addEventListener('DOMContentLoaded', function() {
       deice: getVal('deice_weight')
     };
 
+    // Fuel Inputs
     const galMain = getVal('fuel_main_gal');
     const galAux = getVal('fuel_aux_gal');
-    const galTrip = getVal('trip_fuel_gal');
+    
+    // Flight Fuel Inputs
+    const galFlightMain = getVal('flight_main_gal');
+    const galFlightAux = getVal('flight_aux_gal');
 
+    // Calculate Weights (gal * 7.01)
     const wFuel = {
       main: galMain * FUEL_DENSITY,
       aux: galAux * FUEL_DENSITY,
-      trip: galTrip * FUEL_DENSITY * -1 // Burned fuel (negative weight)
+      // Flight burn is negative weight
+      burnMain: galFlightMain * FUEL_DENSITY * -1,
+      burnAux: galFlightAux * FUEL_DENSITY * -1
     };
 
     // 2. Calculate Moments
@@ -420,7 +447,12 @@ document.addEventListener('DOMContentLoaded', function() {
       deice: w.deice * ARMS.deice,
       fuelMain: wFuel.main * ARMS.fuelMain,
       fuelAux: wFuel.aux * ARMS.fuelAux,
-      trip: wFuel.trip * ARMS.fuelMain
+      
+      // Flight Burn Moments (Arm defined in PDF)
+      [cite_start]// Main Flight Burn Arm: 103.5 [cite: 232]
+      [cite_start]// Aux Flight Burn Arm: 104.5 [cite: 232]
+      burnMain: wFuel.burnMain * 103.5,
+      burnAux: wFuel.burnAux * 104.5
     };
 
     // Update Display (Moments & Fuel Weights)
@@ -438,8 +470,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('fuel_main_mom', m.fuelMain);
     setHtml('fuel_aux_weight', wFuel.aux, 1);
     setHtml('fuel_aux_mom', m.fuelAux);
-    setHtml('trip_fuel_weight', wFuel.trip, 1);
-    setHtml('trip_fuel_mom', m.trip);
+    
+    // Flight Fuel Rows
+    setHtml('flight_main_weight', wFuel.burnMain, 1);
+    setHtml('flight_main_mom', m.burnMain);
+    setHtml('flight_aux_weight', wFuel.burnAux, 1);
+    setHtml('flight_aux_mom', m.burnAux);
 
     // 3. Subtotals
     // Zero Fuel Weight
@@ -460,9 +496,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('tow_cg', towCG, 2);
     setHtml('tow_mom', towMom);
 
-    // Landing Weight
-    const ldgWeight = towWeight + wFuel.trip;
-    const ldgMom = towMom + m.trip;
+    // Landing Weight (TOW + Burn(negative))
+    const ldgWeight = towWeight + wFuel.burnMain + wFuel.burnAux;
+    const ldgMom = towMom + m.burnMain + m.burnAux;
     const ldgCG = ldgWeight > 0 ? ldgMom / ldgWeight : 0;
 
     setHtml('ldg_weight', ldgWeight, 1);
@@ -505,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const inputs = document.querySelectorAll('input');
   inputs.forEach(input => {
     input.addEventListener('input', calculate);
-    input.addEventListener('change', calculate); // Ensure changes like arrow keys also trigger
+    input.addEventListener('change', calculate);
   });
 
   // Initial Calculation
