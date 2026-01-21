@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator (Final Accurate)</title>
+<title>DA42NG Weight & Balance Calculator (Final Precision)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -69,11 +69,6 @@
     box-sizing: border-box; outline: none;
   }
 
-  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-    -webkit-appearance: none; margin: 0;
-  }
-  input[type=number] { -moz-appearance: textfield; }
-
   .calc-cell { background-color: var(--calc-bg); font-weight: bold; }
   .fixed-cell { background-color: #fafafa; color: #666; }
   .section-row td { background-color: #f5f5f5; font-weight: bold; border-top: 2px solid #aaa; }
@@ -95,16 +90,31 @@
   .status-ok { color: var(--safe-color); font-weight: bold; }
   .status-alert { color: var(--alert-color); font-weight: bold; }
 
-  .chart-container {
-    margin-top: 40px; padding: 20px; background: #fff;
-    border: 1px solid #ddd; border-radius: 12px;
+  /* エンベロープの縦横比をPDF図面と同じ視認性に調整 */
+  .chart-wrapper {
+    width: 100%;
+    max-width: 650px; /* 図面のプロットエリアに近い幅 */
+    margin: 40px auto 0;
     position: relative;
-    height: 600px; /* 縦横比再現のため高さを確保 */
+  }
+  
+  .chart-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 115%; /* 縦横比の再現 (幅6:高さ11.5の比率をベースに調整) */
+    height: 0;
+  }
+
+  #wbChart {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
   @media (max-width: 600px) {
     .container { padding: 15px; }
-    .chart-container { height: 400px; }
   }
 </style>
 </head>
@@ -113,7 +123,7 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance</h1>
-    <p>JA224T Accurate Configuration (Full Moment Calculation)</p>
+    <p>JA224T Configuration (Full Accuracy Envelope Reconstruction)</p>
   </header>
 
   <form id="wbForm">
@@ -270,8 +280,10 @@
     </div>
   </div>
 
-  <div class="chart-container">
-    <canvas id="wbChart"></canvas>
+  <div class="chart-wrapper">
+    <div class="chart-container">
+      <canvas id="wbChart"></canvas>
+    </div>
   </div>
 </div>
 
@@ -279,15 +291,14 @@
 document.addEventListener('DOMContentLoaded', function() {
   const ctx = document.getElementById('wbChart').getContext('2d');
   
-  // AFM (MAM 42-198) に基づく精密なエンベロープ座標
-  // 1450kg (3197lb) から 1700kg (3748lb) までは前方限界が垂直 (2.35m = 92.52in)
+  // AFM MAM 42-198 および図面に基づく精密なエンベロープ座標 
   const envelopeData = [
-    {x: 92.52, y: 3197},  // 左下端（1450kg）
-    {x: 92.52, y: 3748},  // 前方屈曲点（垂直区間終了）
-    {x: 94.61, y: 4189},  // 前方上限 (Max TOW)
+    {x: 92.52, y: 3197},  // 左下端 (1450kg / 3197lbs)
+    {x: 92.52, y: 3748},  // 前方限界屈曲点 (1700kg / 3748lbsまで垂直)
+    {x: 94.61, y: 4189},  // 前方上限 (Max TOW / 1900kg)
     {x: 97.64, y: 4189},  // 後方上限
-    {x: 97.64, y: 3748},  // 後方屈曲点（垂直区間開始）
-    {x: 96.46, y: 3197},  // 右下端
+    {x: 97.64, y: 3748},  // 後方限界屈曲点
+    {x: 96.46, y: 3197},  // 右下端 (3197lbsにおける後方限界)
     {x: 92.52, y: 3197}   // ループ閉じる
   ];
 
@@ -296,47 +307,51 @@ document.addEventListener('DOMContentLoaded', function() {
     data: {
       datasets: [
         {
-          label: 'Flight Envelope',
+          label: 'Envelope',
           data: envelopeData,
-          showLine: true, borderColor: 'black', borderWidth: 2, pointRadius: 0, fill: false, tension: 0, z: 1
+          showLine: true, borderColor: '#000', borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0, z: 5
         },
         {
-          label: 'Max Zero Fuel (3900 lbs)',
-          data: [{x: 91, y: 3900}, {x: 99, y: 3900}],
-          showLine: true, borderColor: 'red', borderDash: [5, 5], borderWidth: 1, pointRadius: 0
+          label: 'Max Zero Fuel',
+          data: [{x: 92.5, y: 3900}, {x: 97.64, y: 3900}],
+          showLine: true, borderColor: 'red', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0
         },
         {
-          label: 'Max Landing (3979 lbs)',
-          data: [{x: 91, y: 3979}, {x: 99, y: 3979}],
-          showLine: true, borderColor: 'gray', borderDash: [2, 2], borderWidth: 1, pointRadius: 0
+          label: 'MAX Landing Weight',
+          data: [{x: 92.5, y: 3979}, {x: 97.64, y: 3979}],
+          showLine: true, borderColor: 'green', borderDash: [2, 2], borderWidth: 1.5, pointRadius: 0
         },
         {
-          label: 'States (ZFW, TOW, LDG)',
-          data: [], backgroundColor: 'blue', pointRadius: 6, pointHoverRadius: 8, z: 10
+          label: 'Flight States',
+          data: [], backgroundColor: 'blue', pointRadius: 7, pointHoverRadius: 9, z: 10
         }
       ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false, // コンテナの高さに合わせる
-      aspectRatio: 1, // PDFの正方形に近いグリッドを意識
+      maintainAspectRatio: false,
       scales: {
         x: { 
-          type: 'linear', position: 'bottom', min: 92, max: 98, 
-          ticks: { stepSize: 0.5 }, // PDF同様の0.5刻み
-          title: { display: true, text: 'C.G. Arm (inches aft of datum)' } 
+          type: 'linear', position: 'bottom', 
+          min: 92.0, max: 98.0, // 図面と同じ範囲 [cite: 70, 73]
+          ticks: { stepSize: 0.5, font: { weight: 'bold' } },
+          grid: { color: '#ccc', lineWidth: 1 },
+          title: { display: true, text: 'C.G. Inches Aft of Datum', font: { size: 14, weight: 'bold' } } 
         },
         y: { 
-          min: 3100, max: 4250, 
-          ticks: { stepSize: 100 }, // PDF同様の100刻み
-          title: { display: true, text: 'Weight (lbs)' } 
+          min: 3100, max: 4250, // 図面と同じ範囲 [cite: 64, 69]
+          ticks: { stepSize: 100, font: { weight: 'bold' } },
+          grid: { color: '#ccc', lineWidth: 1 },
+          title: { display: true, text: 'Weight (lbs)', font: { size: 14, weight: 'bold' } } 
         }
       },
       plugins: {
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: (context) => {
-              return context.raw.label + ": (" + context.raw.x.toFixed(2) + " in, " + context.raw.y.toFixed(1) + " lbs)";
+              const label = context.raw.label || '';
+              return label + ": (" + context.raw.x.toFixed(2) + " in, " + context.raw.y.toFixed(1) + " lbs)";
             }
           }
         }
@@ -351,12 +366,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function calculate() {
-    // Basic Empty Weight
-    const bw = getV('bew_weight'), ba = getV('bew_arm');
-    const bm = bw * ba;
+    const bw = getV('bew_weight'), ba = getV('bew_arm'), bm = bw * ba;
     setT('bew_mom', bm, 0);
 
-    // Payload
     const items = [
       {w: getV('p_w'), a: 90.6, id: 'p_m'},
       {w: getV('fp_w'), a: 90.6, id: 'fp_m'},
@@ -374,43 +386,34 @@ document.addEventListener('DOMContentLoaded', function() {
       payloadM += m;
     });
 
-    // De-ice
-    const diW = getV('di_g') * 9.2;
-    const diM = diW * 39.4;
+    const diW = getV('di_g') * 9.2, diM = diW * 39.4;
     setT('di_w', diW, 1); setT('di_m', diM, 0);
 
-    // Zero Fuel Weight (ZFW)
     const zfwW = bw + payloadW + diW;
     const zfwM = bm + payloadM + diM;
     const zfwCG = zfwW > 0 ? zfwM / zfwW : 0;
     setT('zfw_w', zfwW, 1); setT('zfw_m', zfwM, 0); setT('zfw_cg', zfwCG, 2);
 
-    // Fuel Load
     const mfW = getV('mf_g') * 7.01, mfM = mfW * 103.5;
     setT('mf_w', mfW, 1); setT('mf_m', mfM, 0);
     const afW = getV('af_g') * 7.01, afM = afW * 126.0;
     setT('af_w', afW, 1); setT('af_m', afM, 0);
 
-    // Takeoff Weight (TOW)
-    // Runup burn -7.01 lbs, Moment -726 in-lbs (AFM Standard)
     const towW = zfwW + mfW + afW - 7.01;
     const towM = zfwM + mfM + afM - 726;
     const towCG = towW > 0 ? towM / towW : 0;
     setT('tow_w', towW, 1); setT('tow_m', towM, 0); setT('tow_cg', towCG, 2);
 
-    // Flight Burn
     const mffW = getV('mff_g') * 7.01, mffM = mffW * 103.5;
     setT('mff_w', -mffW, 1); setT('mff_m', -mffM, 0);
     const affW = getV('aff_g') * 7.01, affM = affW * 104.5;
     setT('aff_w', -affW, 1); setT('aff_m', -affM, 0);
 
-    // Landing Weight (LW)
     const lwW = towW - mffW - affW;
     const lwM = towM - mffM - affM;
     const lwCG = lwW > 0 ? lwM / lwW : 0;
     setT('lw_w', lwW, 1); setT('lw_m', lwM, 0); setT('lw_cg', lwCG, 2);
 
-    // UI Updates
     document.getElementById('res_tow').innerText = towW.toFixed(1) + " lbs";
     document.getElementById('res_lw').innerText = lwW.toFixed(1) + " lbs";
     document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
@@ -423,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if(lwW > 3979) { ls.innerText = "OVERWEIGHT!"; ls.className = "status-alert"; }
     else { ls.innerText = "Within Limits"; ls.className = "status-ok"; }
 
-    // Chart Update
     chart.data.datasets[3].data = [
       {x: zfwCG, y: zfwW, label: 'ZFW'},
       {x: towCG, y: towW, label: 'TOW'},
