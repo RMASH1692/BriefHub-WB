@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator (Modified)</title>
+<title>DA42NG Weight & Balance Calculator (Full Restore)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -60,20 +60,10 @@
   .wb-table th.left-align { text-align: left; }
 
   .input-cell { background-color: var(--input-bg); width: 100px; padding: 0; }
-  
-  /* 数値入力欄のスタイル（矢印削除を含む） */
   .input-cell input {
     width: 100%; height: 100%; border: none; background: transparent;
     text-align: right; font-size: 15px; font-weight: bold; padding: 10px 12px;
     box-sizing: border-box; outline: none;
-    -moz-appearance: textfield; /* Firefox用矢印削除 */
-  }
-  
-  /* Chrome, Safari, Edge, Opera用矢印削除 */
-  .input-cell input::-webkit-outer-spin-button,
-  .input-cell input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
   }
 
   .calc-cell { background-color: #ffffff; font-weight: bold; }
@@ -105,7 +95,7 @@
     border: 1px solid #ccc;
     background: white;
   }
-   
+  
   .chart-container {
     position: relative;
     width: 100%;
@@ -158,25 +148,29 @@
         <tr>
           <td class="left-text">Pilot</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="p_w" placeholder="0"></td> <td class="fixed-cell">90.6</td>
+          <td class="input-cell"><input type="number" id="p_w" value="170"></td>
+          <td class="fixed-cell">90.6</td>
           <td class="calc-cell" id="p_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Front Passenger</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="fp_w" placeholder="0"></td> <td class="fixed-cell">90.6</td>
+          <td class="input-cell"><input type="number" id="fp_w" value="0"></td>
+          <td class="fixed-cell">90.6</td>
           <td class="calc-cell" id="fp_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Rear Passenger 1</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="r1_w" placeholder="0"></td> <td class="fixed-cell">128.0</td>
+          <td class="input-cell"><input type="number" id="r1_w" value="0"></td>
+          <td class="fixed-cell">128.0</td>
           <td class="calc-cell" id="r1_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Rear Passenger 2</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="r2_w" placeholder="0"></td> <td class="fixed-cell">128.0</td>
+          <td class="input-cell"><input type="number" id="r2_w" value="0"></td>
+          <td class="fixed-cell">128.0</td>
           <td class="calc-cell" id="r2_m">0</td>
         </tr>
         <tr>
@@ -202,7 +196,8 @@
         </tr>
         <tr>
           <td class="left-text">De-ice Fluid (9.2 lbs/gal)</td>
-          <td class="input-cell"><input type="number" id="di_g" placeholder="0"></td> <td class="calc-cell" id="di_w">0</td>
+          <td class="input-cell"><input type="number" id="di_g" value="0"></td>
+          <td class="calc-cell" id="di_w">0</td>
           <td class="fixed-cell">39.4</td>
           <td class="calc-cell" id="di_m">0</td>
         </tr>
@@ -223,7 +218,8 @@
         </tr>
         <tr>
           <td class="left-text">AUX Fuel Load (7.01 lbs/gal)</td>
-          <td class="input-cell"><input type="number" id="af_g" placeholder="0"></td> <td class="calc-cell" id="af_w">0</td>
+          <td class="input-cell"><input type="number" id="af_g" value="0"></td>
+          <td class="calc-cell" id="af_w">0</td>
           <td class="fixed-cell">126.0</td>
           <td class="calc-cell" id="af_m">0</td>
         </tr>
@@ -251,7 +247,8 @@
         </tr>
         <tr>
           <td class="left-text">AUX Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="aff_g" placeholder="0"></td> <td class="calc-cell" id="aff_w">0</td>
+          <td class="input-cell"><input type="number" id="aff_g" value="0"></td>
+          <td class="calc-cell" id="aff_w">0</td>
           <td class="fixed-cell">104.5</td>
           <td class="calc-cell" id="aff_m">0</td>
         </tr>
@@ -297,7 +294,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   const ctx = document.getElementById('wbChart').getContext('2d');
   
-  // エンベロープ精密座標 [cite: 16, 17, 28, 33]
+  // エンベロープ精密座標の復旧 [cite: 16, 17, 28, 33]
   const envelopePoints = [
     {x: 92.52, y: 3197}, // 左下
     {x: 92.52, y: 3252}, // 左縦線の長さ
@@ -329,12 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         {
           label: 'Flight States',
-          // 初期状態では3点（ZFW, TOW, LDG）が計算されてから格納されます
-          data: [], 
-          backgroundColor: 'blue', 
-          pointRadius: 7, 
-          pointHoverRadius: 9, 
-          z: 10
+          data: [], backgroundColor: 'blue', pointRadius: 7, pointHoverRadius: 9, z: 10
         }
       ]
     },
@@ -372,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // 計算エンジン [cite: 1, 2, 7]
+  // 計算エンジンの復旧 [cite: 1, 2, 7]
   function calculate() {
     const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
     const setTxt = (id, val, dec = 0) => {
@@ -440,8 +432,6 @@ document.addEventListener('DOMContentLoaded', function() {
     lwS.className = lwW > 3979 ? "status-alert" : "status-ok";
 
     // Chart Update
-    // 元のコードではwbChart.data.datasets[3].dataに配列を代入していましたが、
-    // 3点プロットが正しく反映されるように配列内のオブジェクト形式を確認済 [cite: 1, 16]
     wbChart.data.datasets[3].data = [
       {x: zfwCG, y: zfwW, label: 'ZFW'},
       {x: towCG, y: towW, label: 'TOW'},
