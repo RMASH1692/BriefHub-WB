@@ -2,8 +2,10 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator</title>
+<title>DA42NG Weight & Balance Calculator (Accurate)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <style>
   :root {
     --primary-color: #0078D4;
@@ -11,10 +13,8 @@
     --card-bg: #ffffff;
     --text-main: #1a1a1a;
     --text-sub: #666666;
-
-    /* 色設定 */
-    --input-bg: #fff9c4; /* 入力欄：明るい黄色 */
-    --calc-bg: #ffffff;  /* 計算結果：白（変更箇所） */
+    --input-bg: #fff9c4;
+    --calc-bg: #ffffff;
     --border-color: #ddd;
     --alert-color: #d32f2f;
     --safe-color: #388e3c;
@@ -26,7 +26,6 @@
     margin: 0;
     padding: 20px;
     color: var(--text-main);
-    line-height: 1.5;
   }
 
   .container {
@@ -44,19 +43,9 @@
     padding-bottom: 10px;
   }
 
-  header h1 {
-    margin: 0;
-    color: var(--primary-color);
-    font-size: 22px;
-  }
+  header h1 { margin: 0; color: var(--primary-color); font-size: 22px; }
+  header p { margin: 5px 0 0; font-size: 13px; color: var(--text-sub); }
 
-  header p {
-    margin: 5px 0 0;
-    font-size: 13px;
-    color: var(--text-sub);
-  }
-
-  /* テーブルスタイル */
   .wb-table {
     width: 100%;
     border-collapse: collapse;
@@ -68,77 +57,28 @@
     border: 1px solid var(--border-color);
     padding: 10px 12px;
     text-align: right;
-    vertical-align: middle;
   }
 
-  .wb-table th {
-    background: #f0f0f0;
-    color: #333;
-    font-weight: bold;
-    text-align: center;
-  }
+  .wb-table th { background: #f0f0f0; font-weight: bold; text-align: center; }
+  .wb-table th.left-align { text-align: left; }
 
-  .wb-table th.left-align {
-    text-align: left;
-  }
-
-  /* 入力セル（黄色） */
-  .input-cell {
-    background-color: var(--input-bg);
-    width: 100px;
-    padding: 0; /* paddingを0にしてinputを広げる */
-  }
-
+  .input-cell { background-color: var(--input-bg); width: 100px; padding: 0; }
   .input-cell input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: transparent;
-    text-align: right;
-    font-size: 15px;
-    font-weight: bold;
-    color: #000;
-    padding: 10px 12px; /* tdのpaddingに合わせる */
-    box-sizing: border-box;
-    outline: none;
+    width: 100%; height: 100%; border: none; background: transparent;
+    text-align: right; font-size: 15px; font-weight: bold; padding: 10px 12px;
+    box-sizing: border-box; outline: none;
   }
 
-  .input-cell input:focus {
-    background-color: #fff59d; /* フォーカス時に少し濃く */
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
   }
+  input[type=number] { -moz-appearance: textfield; }
 
-  .input-cell input::placeholder {
-    color: #aaa;
-    font-weight: normal;
-  }
+  .calc-cell { background-color: var(--calc-bg); font-weight: bold; }
+  .fixed-cell { background-color: #fafafa; color: #666; }
+  .section-row td { background-color: #f5f5f5; font-weight: bold; border-top: 2px solid #aaa; }
+  .left-text { text-align: left !important; }
 
-  /* 計算結果セル（白背景・太字） */
-  .calc-cell {
-    background-color: var(--calc-bg);
-    font-weight: bold;
-    color: var(--text-main);
-  }
-
-  /* 固定テキストセル */
-  .fixed-cell {
-    background-color: #fafafa;
-    color: #666;
-  }
-
-  /* 小計・合計行 */
-  .section-row td {
-    background-color: #f5f5f5;
-    font-weight: bold;
-    color: #333;
-    border-top: 2px solid #aaa;
-  }
-
-  /* 左寄せテキスト */
-  .left-text {
-    text-align: left !important;
-  }
-
-  /* 結果表示カードエリア */
   .result-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -147,47 +87,23 @@
   }
 
   .result-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: #fff; border: 1px solid #ddd; padding: 20px;
+    border-radius: 8px; text-align: center;
   }
 
-  .result-card h3 {
-    margin: 0 0 10px;
-    font-size: 14px;
-    color: #555;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .result-card .value { font-size: 28px; font-weight: bold; display: block; }
+  .status-ok { color: var(--safe-color); font-weight: bold; }
+  .status-alert { color: var(--alert-color); font-weight: bold; }
+
+  .chart-container {
+    margin-top: 40px; padding: 20px; background: #fff;
+    border: 1px solid #ddd; border-radius: 12px; height: 550px;
   }
 
-  .result-card .value {
-    font-size: 28px;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  .status-ok { 
-    color: var(--safe-color); 
-    font-weight: bold;
-    font-size: 14px;
-  }
-  .status-alert { 
-    color: var(--alert-color); 
-    font-weight: bold;
-    font-size: 14px;
-  }
-
-  /* スマホ対応 */
   @media (max-width: 600px) {
     .container { padding: 15px; }
     .wb-table { font-size: 12px; }
-    .wb-table th, .wb-table td { padding: 6px 4px; }
-    .input-cell input { font-size: 13px; padding: 6px 4px; }
-    .result-card .value { font-size: 22px; }
+    .chart-container { height: 350px; }
   }
 </style>
 </head>
@@ -196,10 +112,10 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance</h1>
-    <p>Test run</p>
+    <p>JA224T Accurate Configuration</p>
   </header>
 
-  <form id="wbForm" onsubmit="return false;">
+  <form id="wbForm">
     <table class="wb-table">
       <thead>
         <tr>
@@ -207,7 +123,7 @@
           <th style="width: 60px;">Qty<br>(gal)</th>
           <th style="width: 90px;">Weight<br>(lbs)</th>
           <th style="width: 70px;">Arm<br>(in)</th>
-          <th>Moment<br>(in·lbs)</th>
+          <th>Moment/1000</th>
         </tr>
       </thead>
       <tbody>
@@ -215,119 +131,123 @@
           <td class="left-text">Basic Empty Weight</td>
           <td>-</td>
           <td class="input-cell"><input type="number" id="bew_weight" value="3150.4" step="0.1"></td>
-          <td class="input-cell"><input type="number" id="bew_arm" value="94.7" step="0.01"></td>
+          <td class="input-cell"><input type="number" id="bew_arm" value="94.7" step="0.1"></td>
           <td class="calc-cell" id="bew_mom">0</td>
         </tr>
-
         <tr>
           <td class="left-text">Pilot</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="pilot_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="p_w" value="170"></td>
           <td class="fixed-cell">90.6</td>
-          <td class="calc-cell" id="pilot_mom">0</td>
+          <td class="calc-cell" id="p_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Front Passenger</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="pax_front_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="fp_w" value="0"></td>
           <td class="fixed-cell">90.6</td>
-          <td class="calc-cell" id="pax_front_mom">0</td>
+          <td class="calc-cell" id="fp_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Rear Passenger 1</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="pax_rear1_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="r1_w" value="0"></td>
           <td class="fixed-cell">128.0</td>
-          <td class="calc-cell" id="pax_rear1_mom">0</td>
+          <td class="calc-cell" id="r1_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Rear Passenger 2</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="pax_rear2_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="r2_w" value="0"></td>
           <td class="fixed-cell">128.0</td>
-          <td class="calc-cell" id="pax_rear2_mom">0</td>
+          <td class="calc-cell" id="r2_m">0</td>
         </tr>
         <tr>
-          <td class="left-text">Cargo Nose</td>
+          <td class="left-text">Cargo Nose (Max 66)</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_nose_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="cn_w" value="5"></td>
           <td class="fixed-cell">23.6</td>
-          <td class="calc-cell" id="cargo_nose_mom">0</td>
+          <td class="calc-cell" id="cn_m">0</td>
         </tr>
         <tr>
-          <td class="left-text">Cargo Cabin</td>
+          <td class="left-text">Cargo Cabin (Max 100)</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_cabin_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="cc_w" value="20"></td>
           <td class="fixed-cell">153.1</td>
-          <td class="calc-cell" id="cargo_cabin_mom">0</td>
+          <td class="calc-cell" id="cc_m">0</td>
         </tr>
         <tr>
-          <td class="left-text">Cargo Extend</td>
+          <td class="left-text">Cargo Extend (Max 40)</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="cargo_extend_weight" placeholder="0"></td>
+          <td class="input-cell"><input type="number" id="ce_w" value="2"></td>
           <td class="fixed-cell">178.7</td>
-          <td class="calc-cell" id="cargo_extend_mom">0</td>
+          <td class="calc-cell" id="ce_m">0</td>
         </tr>
         <tr>
-          <td class="left-text">De-ice Fluid (gal)</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="deice_weight" placeholder="0"></td>
+          <td class="left-text">De-ice Fluid (9.2 lbs/gal)</td>
+          <td class="input-cell"><input type="number" id="di_g" value="0"></td>
+          <td class="calc-cell" id="di_w">0</td>
           <td class="fixed-cell">39.4</td>
-          <td class="calc-cell" id="deice_mom">0</td>
+          <td class="calc-cell" id="di_m">0</td>
         </tr>
 
         <tr class="section-row">
-          <td colspan="2" class="left-text">Zero Fuel Condition</td>
-          <td class="calc-cell" id="zfw_weight">0</td>
+          <td colspan="2" class="left-text">Zero Fuel Condition (Max 3900)</td>
+          <td class="calc-cell" id="zfw_w">0</td>
           <td class="calc-cell" id="zfw_cg">0</td>
-          <td class="calc-cell" id="zfw_mom">0</td>
+          <td class="calc-cell" id="zfw_m">0</td>
         </tr>
 
         <tr>
-          <td class="left-text">Main Fuel on Board</td>
-          <td class="input-cell"><input type="number" id="fuel_main_gal" placeholder="0"></td>
-          <td class="calc-cell" id="fuel_main_weight">0</td>
+          <td class="left-text">Main Fuel Load (7.01 lbs/gal)</td>
+          <td class="input-cell"><input type="number" id="mf_g" value="50"></td>
+          <td class="calc-cell" id="mf_w">0</td>
           <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="fuel_main_mom">0</td>
+          <td class="calc-cell" id="mf_m">0</td>
         </tr>
         <tr>
-          <td class="left-text">AUX Fuel</td>
-          <td class="input-cell"><input type="number" id="fuel_aux_gal" placeholder="0" value="0"></td>
-          <td class="calc-cell" id="fuel_aux_weight">0</td>
+          <td class="left-text">AUX Fuel Load (7.01 lbs/gal)</td>
+          <td class="input-cell"><input type="number" id="af_g" value="0"></td>
+          <td class="calc-cell" id="af_w">0</td>
           <td class="fixed-cell">126.0</td>
-          <td class="calc-cell" id="fuel_aux_mom">0</td>
+          <td class="calc-cell" id="af_m">0</td>
         </tr>
         <tr>
           <td class="left-text">Runup/Taxi Burn off</td>
           <td class="fixed-cell">-1.0</td>
           <td class="fixed-cell">-7.01</td>
           <td class="fixed-cell">103.5</td>
-          <td class="fixed-cell">-726</td>
+          <td class="fixed-cell">-0.726</td>
         </tr>
 
         <tr class="section-row">
-          <td colspan="2" class="left-text">Takeoff Condition</td>
-          <td class="calc-cell" id="tow_weight">0</td>
+          <td colspan="2" class="left-text">Takeoff Condition (Max 4189)</td>
+          <td class="calc-cell" id="tow_w">0</td>
           <td class="calc-cell" id="tow_cg">0</td>
-          <td class="calc-cell" id="tow_mom">0</td>
+          <td class="calc-cell" id="tow_m">0</td>
         </tr>
 
         <tr>
-          <td class="left-text">Trip Fuel</td>
-          <td class="input-cell"><input type="number" id="trip_fuel_gal" placeholder="gal"></td>
-          <td class="input-cell"><input type="number" id="trip_fuel_gal" placeholder="0"></td>
-          <td class="calc-cell" id="trip_fuel_weight">0</td>
+          <td class="left-text">Main Fuel for Flight</td>
+          <td class="input-cell"><input type="number" id="mff_g" value="10"></td>
+          <td class="calc-cell" id="mff_w">0</td>
           <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="trip_fuel_mom">0</td>
+          <td class="calc-cell" id="mff_m">0</td>
+        </tr>
+        <tr>
+          <td class="left-text">AUX Fuel for Flight</td>
+          <td class="input-cell"><input type="number" id="aff_g" value="0"></td>
+          <td class="calc-cell" id="aff_w">0</td>
+          <td class="fixed-cell">104.5</td>
+          <td class="calc-cell" id="aff_m">0</td>
         </tr>
 
         <tr class="section-row">
-          <td colspan="2" class="left-text">Landing Condition</td>
-          <td class="calc-cell" id="ldg_weight">0</td>
-          <td class="calc-cell" id="ldg_cg">0</td>
-          <td class="calc-cell" id="ldg_mom">0</td>
+          <td colspan="2" class="left-text">Landing Condition (Max 3979)</td>
+          <td class="calc-cell" id="lw_w">0</td>
+          <td class="calc-cell" id="lw_cg">0</td>
+          <td class="calc-cell" id="lw_m">0</td>
         </tr>
-
       </tbody>
     </table>
   </form>
@@ -337,179 +257,158 @@
       <h3>Takeoff Weight</h3>
       <span class="value" id="res_tow">0 lbs</span>
       <span id="res_tow_status" class="status-ok">Within Limits</span>
-      <div style="font-size:12px; color:#888; margin-top:5px;">Max: 4189 lbs</div>
     </div>
     <div class="result-card">
       <h3>Landing Weight</h3>
-      <span class="value" id="res_ldg">0 lbs</span>
-      <span id="res_ldg_status" class="status-ok">Within Limits</span>
-      <div style="font-size:12px; color:#888; margin-top:5px;">Max: 3979 lbs</div>
+      <span class="value" id="res_lw">0 lbs</span>
+      <span id="res_lw_status" class="status-ok">Within Limits</span>
     </div>
     <div class="result-card">
       <h3>Takeoff C.G.</h3>
       <span class="value" id="res_cg">0 in</span>
-      <div style="font-size:12px; color:#888; margin-top:5px;">Check Envelope</div>
     </div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="wbChart"></canvas>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Constants
-  const ARMS = {
-    pilot: 90.6,
-    frontPax: 90.6,
-    rearPax: 128.0,
-    cargoNose: 23.6,
-    cargoCabin: 153.1,
-    cargoExtend: 178.7,
-    deice: 39.4,
-    fuelMain: 103.5,
-    fuelAux: 126.0
-  };
-  const FUEL_DENSITY = 7.01; 
-  const LIMITS = { maxTOW: 4189, maxLDG: 3979 };
-  const TAXI = { weight: -7.01, moment: -726 };
+  const ctx = document.getElementById('wbChart').getContext('2d');
+  
+  // エンペローブ座標 (PDF図面 より抽出)
+  const envelopeData = [
+    {x: 92.5, y: 3200},   // 前方下限
+    {x: 94.42, y: 4189},  // 前方上限 (Max TOW)
+    {x: 97.6, y: 4189},   // 後方上限
+    {x: 97.6, y: 3748},   // 後方屈曲点
+    {x: 96.5, y: 3200},   // 後方下限
+    {x: 92.5, y: 3200}    // ループ閉じる
+  ];
 
-  // Helper Functions
-  function getVal(id) {
-    const val = parseFloat(document.getElementById(id).value);
-    return isNaN(val) ? 0 : val;
-  }
+  const chart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        {
+          label: 'Flight Envelope',
+          data: envelopeData,
+          showLine: true, borderColor: 'black', borderWidth: 2, pointRadius: 0, fill: false, tension: 0, z: 1
+        },
+        {
+          label: 'Max Zero Fuel (3900 lbs)',
+          data: [{x: 91, y: 3900}, {x: 99, y: 3900}],
+          showLine: true, borderColor: 'red', borderDash: [5, 5], borderWidth: 1, pointRadius: 0
+        },
+        {
+          label: 'Max Landing (3979 lbs)',
+          data: [{x: 91, y: 3979}, {x: 99, y: 3979}],
+          showLine: true, borderColor: 'gray', borderDash: [2, 2], borderWidth: 1, pointRadius: 0
+        },
+        {
+          label: 'States (ZFW, TOW, LDG)',
+          data: [], backgroundColor: 'blue', pointRadius: 6, pointHoverRadius: 8, z: 10
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { type: 'linear', position: 'bottom', min: 92, max: 98, title: { display: true, text: 'C.G. Arm (in)' } },
+        y: { min: 3100, max: 4250, title: { display: true, text: 'Weight (lbs)' } }
+      }
+    }
+  });
 
-  function setHtml(id, val, decimals = 0) {
+  function getV(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  function setT(id, val, dec = 0) { 
     const el = document.getElementById(id);
-    if(el) el.innerText = val.toFixed(decimals);
+    if(el) el.innerText = val.toFixed(dec); 
   }
 
   function calculate() {
-    // 1. Get Inputs
-    const bewWeight = getVal('bew_weight');
-    const bewArm = getVal('bew_arm');
+    // Basic
+    const bw = getV('bew_weight'), ba = getV('bew_arm');
+    const bm = (bw * ba) / 1000;
+    setT('bew_mom', bm, 3);
 
-    const w = {
-      pilot: getVal('pilot_weight'),
-      front: getVal('pax_front_weight'),
-      rear1: getVal('pax_rear1_weight'),
-      rear2: getVal('pax_rear2_weight'),
-      nose: getVal('cargo_nose_weight'),
-      cabin: getVal('cargo_cabin_weight'),
-      extend: getVal('cargo_extend_weight'),
-      deice: getVal('deice_weight')
-    };
+    // Payload
+    const items = [
+      {w: getV('p_w'), a: 90.6, id: 'p_m'},
+      {w: getV('fp_w'), a: 90.6, id: 'fp_m'},
+      {w: getV('r1_w'), a: 128.0, id: 'r1_m'},
+      {w: getV('r2_w'), a: 128.0, id: 'r2_m'},
+      {w: getV('cn_w'), a: 23.6, id: 'cn_m'},
+      {w: getV('cc_w'), a: 153.1, id: 'cc_m'},
+      {w: getV('ce_w'), a: 178.7, id: 'ce_m'}
+    ];
+    let payloadW = 0, payloadM = 0;
+    items.forEach(i => {
+      const m = (i.w * i.a) / 1000;
+      setT(i.id, m, 3);
+      payloadW += i.w;
+      payloadM += m;
+    });
 
-    const galMain = getVal('fuel_main_gal');
-    const galAux = getVal('fuel_aux_gal');
-    const galTrip = getVal('trip_fuel_gal');
+    // De-ice
+    const diW = getV('di_g') * 9.2;
+    const diM = (diW * 39.4) / 1000;
+    setT('di_w', diW, 1); setT('di_m', diM, 3);
 
-    const wFuel = {
-      main: galMain * FUEL_DENSITY,
-      aux: galAux * FUEL_DENSITY,
-      trip: galTrip * FUEL_DENSITY * -1 // Burned fuel (negative weight)
-    };
+    // ZFW
+    const zfwW = bw + payloadW + diW;
+    const zfwM = bm + payloadM + diM;
+    const zfwCG = zfwW > 0 ? (zfwM * 1000) / zfwW : 0;
+    setT('zfw_w', zfwW, 1); setT('zfw_m', zfwM, 3); setT('zfw_cg', zfwCG, 2);
 
-    // 2. Calculate Moments
-    const momBEW = bewWeight * bewArm;
-    const m = {
-      pilot: w.pilot * ARMS.pilot,
-      front: w.front * ARMS.frontPax,
-      rear1: w.rear1 * ARMS.rearPax,
-      rear2: w.rear2 * ARMS.rearPax,
-      nose: w.nose * ARMS.cargoNose,
-      cabin: w.cabin * ARMS.cargoCabin,
-      extend: w.extend * ARMS.cargoExtend,
-      deice: w.deice * ARMS.deice,
-      fuelMain: wFuel.main * ARMS.fuelMain,
-      fuelAux: wFuel.aux * ARMS.fuelAux,
-      trip: wFuel.trip * ARMS.fuelMain
-    };
+    // Fuel Load
+    const mfW = getV('mf_g') * 7.01, mfM = (mfW * 103.5) / 1000;
+    setT('mf_w', mfW, 1); setT('mf_m', mfM, 3);
+    const afW = getV('af_g') * 7.01, afM = (afW * 126.0) / 1000;
+    setT('af_w', afW, 1); setT('af_m', afM, 3);
 
-    // Update Display (Moments & Fuel Weights)
-    setHtml('bew_mom', momBEW);
-    setHtml('pilot_mom', m.pilot);
-    setHtml('pax_front_mom', m.front);
-    setHtml('pax_rear1_mom', m.rear1);
-    setHtml('pax_rear2_mom', m.rear2);
-    setHtml('cargo_nose_mom', m.nose);
-    setHtml('cargo_cabin_mom', m.cabin);
-    setHtml('cargo_extend_mom', m.extend);
-    setHtml('deice_mom', m.deice);
+    // TOW
+    const towW = zfwW + mfW + afW - 7.01;
+    const towM = zfwM + mfM + afM - 0.726;
+    const towCG = towW > 0 ? (towM * 1000) / towW : 0;
+    setT('tow_w', towW, 1); setT('tow_m', towM, 3); setT('tow_cg', towCG, 2);
 
-    setHtml('fuel_main_weight', wFuel.main, 1);
-    setHtml('fuel_main_mom', m.fuelMain);
-    setHtml('fuel_aux_weight', wFuel.aux, 1);
-    setHtml('fuel_aux_mom', m.fuelAux);
-    setHtml('trip_fuel_weight', wFuel.trip, 1);
-    setHtml('trip_fuel_mom', m.trip);
+    // Landing
+    const mffW = getV('mff_g') * 7.01, mffM = (mffW * 103.5) / 1000;
+    setT('mff_w', mffW, 1); setT('mff_m', mffM, 3);
+    const affW = getV('aff_g') * 7.01, affM = (affW * 104.5) / 1000;
+    setT('aff_w', affW, 1); setT('aff_m', affM, 3);
 
-    // 3. Subtotals
-    // Zero Fuel Weight
-    const zfwWeight = bewWeight + w.pilot + w.front + w.rear1 + w.rear2 + w.nose + w.cabin + w.extend + w.deice;
-    const zfwMom = momBEW + m.pilot + m.front + m.rear1 + m.rear2 + m.nose + m.cabin + m.extend + m.deice;
-    const zfwCG = zfwWeight > 0 ? zfwMom / zfwWeight : 0;
+    const lwW = towW - mffW - affW;
+    const lwM = towM - mffM - affM;
+    const lwCG = lwW > 0 ? (lwM * 1000) / lwW : 0;
+    setT('lw_w', lwW, 1); setT('lw_m', lwM, 3); setT('lw_cg', lwCG, 2);
 
-    setHtml('zfw_weight', zfwWeight, 1);
-    setHtml('zfw_cg', zfwCG, 2);
-    setHtml('zfw_mom', zfwMom);
-
-    // Takeoff Weight
-    const towWeight = zfwWeight + wFuel.main + wFuel.aux + TAXI.weight;
-    const towMom = zfwMom + m.fuelMain + m.fuelAux + TAXI.moment;
-    const towCG = towWeight > 0 ? towMom / towWeight : 0;
-
-    setHtml('tow_weight', towWeight, 1);
-    setHtml('tow_cg', towCG, 2);
-    setHtml('tow_mom', towMom);
-
-    // Landing Weight
-    const ldgWeight = towWeight + wFuel.trip;
-    const ldgMom = towMom + m.trip;
-    const ldgCG = ldgWeight > 0 ? ldgMom / ldgWeight : 0;
-
-    setHtml('ldg_weight', ldgWeight, 1);
-    setHtml('ldg_cg', ldgCG, 2);
-    setHtml('ldg_mom', ldgMom);
-
-    // 4. Update Result Cards & Alert Check
-    document.getElementById('res_tow').innerText = towWeight.toFixed(1) + " lbs";
-    document.getElementById('res_ldg').innerText = ldgWeight.toFixed(1) + " lbs";
+    // Update Results
+    document.getElementById('res_tow').innerText = towW.toFixed(1) + " lbs";
+    document.getElementById('res_lw').innerText = lwW.toFixed(1) + " lbs";
     document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
 
-    // TOW Alert
-    const towStatus = document.getElementById('res_tow_status');
-    const towEl = document.getElementById('tow_weight');
-    if (towWeight > LIMITS.maxTOW) {
-      towStatus.innerText = "OVER MAX WEIGHT!";
-      towStatus.className = "status-alert";
-      towEl.style.color = "var(--alert-color)";
-    } else {
-      towStatus.innerText = "Within Limits";
-      towStatus.className = "status-ok";
-      towEl.style.color = "var(--text-main)";
-    }
+    const ts = document.getElementById('res_tow_status');
+    if(towW > 4189) { ts.innerText = "OVERWEIGHT!"; ts.className = "status-alert"; }
+    else { ts.innerText = "Within Limits"; ts.className = "status-ok"; }
 
-    // LDG Alert
-    const ldgStatus = document.getElementById('res_ldg_status');
-    const ldgEl = document.getElementById('ldg_weight');
-    if (ldgWeight > LIMITS.maxLDG) {
-      ldgStatus.innerText = "OVER MAX WEIGHT!";
-      ldgStatus.className = "status-alert";
-      ldgEl.style.color = "var(--alert-color)";
-    } else {
-      ldgStatus.innerText = "Within Limits";
-      ldgStatus.className = "status-ok";
-      ldgEl.style.color = "var(--text-main)";
-    }
+    const ls = document.getElementById('res_lw_status');
+    if(lwW > 3979) { ls.innerText = "OVERWEIGHT!"; ls.className = "status-alert"; }
+    else { ls.innerText = "Within Limits"; ls.className = "status-ok"; }
+
+    // Update Chart
+    chart.data.datasets[3].data = [
+      {x: zfwCG, y: zfwW, label: 'ZFW'},
+      {x: towCG, y: towW, label: 'TOW'},
+      {x: lwCG, y: lwW, label: 'LDG'}
+    ];
+    chart.update();
   }
 
-  // Bind Events
-  const inputs = document.querySelectorAll('input');
-  inputs.forEach(input => {
-    input.addEventListener('input', calculate);
-    input.addEventListener('change', calculate); // Ensure changes like arrow keys also trigger
-  });
-
-  // Initial Calculation
+  document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculate));
   calculate();
 });
 </script>
