@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>DA42NG Weight & Balance Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <style>
   :root {
@@ -114,11 +114,11 @@
     font-weight: normal;
   }
 
-  /* 数値入力のスピンボタンを消す */
-  input::-webkit-outer-spin-button,
-  input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  /* 数値入力のスピンボタン（矢印）を完全に消すCSS */
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
   }
   input[type=number] {
     -moz-appearance: textfield;
@@ -184,15 +184,17 @@
   .status-alert { color: var(--alert-color); font-weight: bold; font-size: 14px; }
 
   /* グラフエリア */
+  .chart-wrapper {
+    margin-top: 40px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    background: #fff;
+  }
   .chart-container {
     position: relative;
     height: 500px;
     width: 100%;
-    margin-top: 30px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-    background: #fff;
   }
 
   @media (max-width: 600px) {
@@ -210,7 +212,7 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance</h1>
-    [cite_start]<p>JA224T Load Sheet Calculation [cite: 235]</p>
+    <p>JA224T Load Sheet Calculation</p>
   </header>
 
   <form id="wbForm" onsubmit="return false;">
@@ -336,7 +338,7 @@
 
         <tr>
           <td class="left-text">AUX Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="flight_aux_gal" placeholder="0" value="0"></td>
+          <td class="input-cell"><input type="number" id="flight_aux_gal" value="0"></td>
           <td class="calc-cell" id="flight_aux_weight">0</td>
           <td class="fixed-cell">104.5</td>
           <td class="calc-cell" id="flight_aux_mom">0</td>
@@ -373,108 +375,18 @@
     </div>
   </div>
 
-  <div class="chart-container">
-    <canvas id="envelopeChart"></canvas>
+  <div class="chart-wrapper">
+    <div class="chart-container">
+      <canvas id="envelopeChart"></canvas>
+    </div>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // --- Chart.js Setup ---
-  const ctx = document.getElementById('envelopeChart').getContext('2d');
+// Wait for DOM to allow Chart.js to load
+window.addEventListener('load', function() {
   
-  [cite_start]// Envelope definition based on DA42NG Chart [cite: 234]
-  // Coordinates approximated from the provided grid image
-  const envelopeData = [
-    {x: 92.2, y: 3100},  // Bottom Left approx (extrapolated down)
-    {x: 94.6, y: 4189},  // Top Left (Max TOW Front)
-    {x: 97.6, y: 4189},  // Top Right (Max TOW Rear)
-    {x: 97.6, y: 3100}   // Bottom Right approx
-  ];
-
-  const wbChart = new Chart(ctx, {
-    type: 'scatter',
-    data: {
-      datasets: [
-        // 1. Flight Envelope (Polygon)
-        {
-          label: 'Envelope',
-          data: envelopeData,
-          showLine: true,
-          borderColor: '#000',
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: false,
-          tension: 0
-        },
-        [cite_start]// 2. Max Landing Weight Limit (Line) [cite: 251]
-        {
-          label: 'Max LDG (3979 lbs)',
-          data: [{x: 92, y: 3979}, {x: 98, y: 3979}],
-          showLine: true,
-          borderColor: 'rgba(220, 53, 69, 0.6)', // Redish
-          borderDash: [5, 5],
-          borderWidth: 1.5,
-          pointRadius: 0
-        },
-        [cite_start]// 3. Max Zero Fuel Weight Limit (Line) [cite: 250]
-        {
-          label: 'Max ZFW (3900 lbs)',
-          data: [{x: 92, y: 3900}, {x: 98, y: 3900}],
-          showLine: true,
-          borderColor: 'rgba(255, 193, 7, 0.8)', // Yellowish
-          borderDash: [5, 5],
-          borderWidth: 1.5,
-          pointRadius: 0
-        },
-        // 4. Current Flight Points (Scatter)
-        {
-          label: 'Flight Points',
-          data: [], // Updated dynamically
-          backgroundColor: '#0078D4',
-          borderColor: '#0078D4',
-          pointRadius: 6,
-          pointHoverRadius: 8
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: {
-          type: 'linear',
-          position: 'bottom',
-          title: { display: true, text: 'C.G. [cite_start]Arm (in) [cite: 269]' },
-          min: 92,
-          max: 98,
-          grid: { color: '#eee' }
-        },
-        y: {
-          [cite_start]title: { display: true, text: 'Weight (lbs) [cite: 259]' },
-          min: 3100,
-          max: 4300,
-          grid: { color: '#eee' }
-        }
-      },
-      plugins: {
-        title: {
-          display: true,
-          [cite_start]text: 'Weight and Balance Chart [cite: 234]',
-          font: { size: 16 }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.raw.label ? context.raw.label + ': (' + context.raw.x.toFixed(2) + ', ' + context.raw.y.toFixed(0) + ')' : '';
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // --- Calculation Logic ---
+  // --- Constants ---
   const ARMS = {
     pilot: 90.6,
     frontPax: 90.6,
@@ -490,6 +402,81 @@ document.addEventListener('DOMContentLoaded', function() {
   const LIMITS = { maxTOW: 4189, maxLDG: 3979 };
   const TAXI = { weight: -7.01, moment: -726 };
 
+  // --- Chart Initialization ---
+  let wbChart = null;
+  const ctx = document.getElementById('envelopeChart').getContext('2d');
+
+  // Envelope data points approximated from DA42NG Manual
+  const envelopeData = [
+    {x: 92.5, y: 3200},  // Approx bottom left
+    {x: 94.5, y: 4189},  // Top Left
+    {x: 97.6, y: 4189},  // Top Right
+    {x: 97.6, y: 3200},  // Bottom Right
+    {x: 92.5, y: 3200}   // Close loop
+  ];
+
+  try {
+    wbChart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Flight Envelope',
+            data: envelopeData,
+            showLine: true,
+            borderColor: 'black',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            tension: 0
+          },
+          {
+            label: 'Max Landing Weight',
+            data: [{x: 92, y: 3979}, {x: 98, y: 3979}],
+            showLine: true,
+            borderColor: 'red',
+            borderDash: [5, 5],
+            borderWidth: 1,
+            pointRadius: 0
+          },
+          {
+            label: 'Flight Points (ZFW, TOW, LDG)',
+            data: [], // Populated dynamically
+            backgroundColor: '#0078D4',
+            pointRadius: 6,
+            pointHoverRadius: 8
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: { display: true, text: 'Center of Gravity Envelope', font: {size:16} },
+          legend: { position: 'bottom' }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            min: 92,
+            max: 98,
+            title: { display: true, text: 'C.G. Arm (in)' }
+          },
+          y: {
+            min: 3000,
+            max: 4300,
+            title: { display: true, text: 'Weight (lbs)' }
+          }
+        }
+      }
+    });
+  } catch (e) {
+    console.error("Chart.js failed to load", e);
+    // Continue running calculation logic even if chart fails
+  }
+
+  // --- Calculation Logic ---
   function getVal(id) {
     const val = parseFloat(document.getElementById(id).value);
     return isNaN(val) ? 0 : val;
@@ -520,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const galMain = getVal('fuel_main_gal');
     const galAux = getVal('fuel_aux_gal');
     
-    // Flight Fuel Inputs
+    // Flight Fuel Inputs (Burn)
     const galFlightMain = getVal('flight_main_gal');
     const galFlightAux = getVal('flight_aux_gal');
 
@@ -528,6 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const wFuel = {
       main: galMain * FUEL_DENSITY,
       aux: galAux * FUEL_DENSITY,
+      // Burn is negative weight
       burnMain: galFlightMain * FUEL_DENSITY * -1,
       burnAux: galFlightAux * FUEL_DENSITY * -1
     };
@@ -545,11 +533,12 @@ document.addEventListener('DOMContentLoaded', function() {
       deice: w.deice * ARMS.deice,
       fuelMain: wFuel.main * ARMS.fuelMain,
       fuelAux: wFuel.aux * ARMS.fuelAux,
-      burnMain: wFuel.burnMain * 103.5, // Arm for main burn
-      [cite_start]burnAux: wFuel.burnAux * 104.5    // Arm for aux burn [cite: 232, 238]
+      // Burn Moments
+      burnMain: wFuel.burnMain * 103.5, 
+      burnAux: wFuel.burnAux * 104.5    
     };
 
-    // Update Display
+    // Update Display (Weights & Moments)
     setHtml('bew_mom', momBEW);
     setHtml('pilot_mom', m.pilot);
     setHtml('pax_front_mom', m.front);
@@ -571,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('flight_aux_mom', m.burnAux);
 
     // 3. Subtotals
-    // Zero Fuel Weight
+    // Zero Fuel Weight (ZFW)
     const zfwWeight = bewWeight + w.pilot + w.front + w.rear1 + w.rear2 + w.nose + w.cabin + w.extend + w.deice;
     const zfwMom = momBEW + m.pilot + m.front + m.rear1 + m.rear2 + m.nose + m.cabin + m.extend + m.deice;
     const zfwCG = zfwWeight > 0 ? zfwMom / zfwWeight : 0;
@@ -580,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('zfw_cg', zfwCG, 2);
     setHtml('zfw_mom', zfwMom);
 
-    // Takeoff Weight
+    // Takeoff Weight (TOW)
     const towWeight = zfwWeight + wFuel.main + wFuel.aux + TAXI.weight;
     const towMom = zfwMom + m.fuelMain + m.fuelAux + TAXI.moment;
     const towCG = towWeight > 0 ? towMom / towWeight : 0;
@@ -589,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('tow_cg', towCG, 2);
     setHtml('tow_mom', towMom);
 
-    // Landing Weight
+    // Landing Weight (LDG)
     const ldgWeight = towWeight + wFuel.burnMain + wFuel.burnAux;
     const ldgMom = towMom + m.burnMain + m.burnAux;
     const ldgCG = ldgWeight > 0 ? ldgMom / ldgWeight : 0;
@@ -598,45 +587,43 @@ document.addEventListener('DOMContentLoaded', function() {
     setHtml('ldg_cg', ldgCG, 2);
     setHtml('ldg_mom', ldgMom);
 
-    // 4. Alerts
+    // 4. Update Cards & Alerts
     document.getElementById('res_tow').innerText = towWeight.toFixed(1) + " lbs";
     document.getElementById('res_ldg').innerText = ldgWeight.toFixed(1) + " lbs";
     document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
 
-    // Alert Logic (Coloring)
+    // TOW Alert
     const towStatus = document.getElementById('res_tow_status');
-    const towEl = document.getElementById('tow_weight');
     if (towWeight > LIMITS.maxTOW) {
       towStatus.innerText = "OVER MAX WEIGHT!";
       towStatus.className = "status-alert";
-      towEl.style.color = "var(--alert-color)";
+      document.getElementById('tow_weight').style.color = "var(--alert-color)";
     } else {
       towStatus.innerText = "Within Limits";
       towStatus.className = "status-ok";
-      towEl.style.color = "var(--text-main)";
+      document.getElementById('tow_weight').style.color = "var(--text-main)";
     }
 
+    // LDG Alert
     const ldgStatus = document.getElementById('res_ldg_status');
-    const ldgEl = document.getElementById('ldg_weight');
     if (ldgWeight > LIMITS.maxLDG) {
       ldgStatus.innerText = "OVER MAX WEIGHT!";
       ldgStatus.className = "status-alert";
-      ldgEl.style.color = "var(--alert-color)";
+      document.getElementById('ldg_weight').style.color = "var(--alert-color)";
     } else {
       ldgStatus.innerText = "Within Limits";
       ldgStatus.className = "status-ok";
-      ldgEl.style.color = "var(--text-main)";
+      document.getElementById('ldg_weight').style.color = "var(--text-main)";
     }
 
     // 5. Update Chart
-    // Only update if we have valid weights
-    if (zfwWeight > 0) {
-        wbChart.data.datasets[3].data = [
-            { x: zfwCG, y: zfwWeight, label: 'ZFW' },
-            { x: towCG, y: towWeight, label: 'TOW' },
-            { x: ldgCG, y: ldgWeight, label: 'LDG' }
-        ];
-        wbChart.update();
+    if (wbChart && zfwWeight > 0) {
+      wbChart.data.datasets[2].data = [
+        { x: zfwCG, y: zfwWeight, label: 'ZFW' },
+        { x: towCG, y: towWeight, label: 'TOW' },
+        { x: ldgCG, y: ldgWeight, label: 'LDG' }
+      ];
+      wbChart.update();
     }
   }
 
