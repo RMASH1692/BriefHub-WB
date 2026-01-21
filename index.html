@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator (Final Layout)</title>
+<title>DA42NG Weight & Balance Calculator (Full Restore)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -12,9 +12,7 @@
     --bg-color: #f4f7f9;
     --card-bg: #ffffff;
     --text-main: #1a1a1a;
-    --text-sub: #666666;
     --input-bg: #fff9c4;
-    --calc-bg: #ffffff;
     --border-color: #ddd;
     --alert-color: #d32f2f;
     --safe-color: #388e3c;
@@ -29,7 +27,7 @@
   }
 
   .container {
-    max-width: 900px; /* 全体の基準幅 */
+    max-width: 900px;
     margin: 0 auto;
     background: var(--card-bg);
     padding: 30px;
@@ -46,7 +44,7 @@
   header h1 { margin: 0; color: var(--primary-color); font-size: 22px; }
 
   .wb-table {
-    width: 100%; /* 表の幅を100%に固定 */
+    width: 100%;
     border-collapse: collapse;
     margin-bottom: 30px;
     font-size: 14px;
@@ -68,7 +66,7 @@
     box-sizing: border-box; outline: none;
   }
 
-  .calc-cell { background-color: var(--calc-bg); font-weight: bold; }
+  .calc-cell { background-color: #ffffff; font-weight: bold; }
   .fixed-cell { background-color: #fafafa; color: #666; }
   .section-row td { background-color: #f5f5f5; font-weight: bold; border-top: 2px solid #aaa; }
   .left-text { text-align: left !important; }
@@ -89,20 +87,19 @@
   .status-ok { color: var(--safe-color); font-weight: bold; }
   .status-alert { color: var(--alert-color); font-weight: bold; }
 
-  /* チャート幅を表に合わせる修正 */
+  /* チャート幅を表に合わせるスタイル */
   .chart-wrapper {
-    width: 100%; /* 表と同じ幅に設定 */
+    width: 100%;
     margin: 40px 0 0;
     position: relative;
     border: 1px solid #ccc;
     background: white;
-    box-sizing: border-box;
   }
   
   .chart-container {
     position: relative;
     width: 100%;
-    padding-bottom: 65%; /* 横幅拡大に合わせてPDFの視認比率を維持 */
+    padding-bottom: 65%; /* 横長比率を維持 */
     height: 0;
   }
 
@@ -118,7 +115,6 @@
     font-size: 18px;
     text-align: center;
     margin-bottom: 10px;
-    color: var(--text-main);
   }
 </style>
 </head>
@@ -127,7 +123,7 @@
 <div class="container">
   <header>
     <h1>DA42NG Weight & Balance Calculator</h1>
-    <p>JA224T Configuration (Full Width Responsive Interface)</p>
+    <p>JA224T Configuration (Restored Precision Model)</p>
   </header>
 
   <form id="wbForm">
@@ -136,99 +132,99 @@
         <tr>
           <th class="left-align">Position</th>
           <th style="width: 60px;">Qty</th>
-          [cite_start]<th style="width: 90px;">Weight (lbs) [cite: 5]</th>
-          [cite_start]<th style="width: 70px;">Arm (in) [cite: 5]</th>
+          <th style="width: 90px;">Weight (lbs)</th>
+          <th style="width: 70px;">Arm (in)</th>
           <th>Moment (in-lbs)</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          [cite_start]<td class="left-text">Basic Empty Weight [cite: 30]</td>
+          <td class="left-text">Basic Empty Weight</td>
           <td>-</td>
           <td class="input-cell"><input type="number" id="bew_weight" value="3150.4" step="0.1"></td>
           <td class="input-cell"><input type="number" id="bew_arm" value="94.7" step="0.1"></td>
           <td class="calc-cell" id="bew_mom">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Pilot [cite: 5]</td>
+          <td class="left-text">Pilot</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="p_w" value=""></td>
+          <td class="input-cell"><input type="number" id="p_w" value="170"></td>
           <td class="fixed-cell">90.6</td>
           <td class="calc-cell" id="p_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Front Passenger [cite: 5]</td>
+          <td class="left-text">Front Passenger</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="fp_w" value=""></td>
+          <td class="input-cell"><input type="number" id="fp_w" value="0"></td>
           <td class="fixed-cell">90.6</td>
           <td class="calc-cell" id="fp_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Rear Passenger 1 [cite: 5]</td>
+          <td class="left-text">Rear Passenger 1</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="r1_w" value=""></td>
+          <td class="input-cell"><input type="number" id="r1_w" value="0"></td>
           <td class="fixed-cell">128.0</td>
           <td class="calc-cell" id="r1_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Rear Passenger 2 [cite: 5]</td>
+          <td class="left-text">Rear Passenger 2</td>
           <td>-</td>
-          <td class="input-cell"><input type="number" id="r2_w" value=""></td>
+          <td class="input-cell"><input type="number" id="r2_w" value="0"></td>
           <td class="fixed-cell">128.0</td>
           <td class="calc-cell" id="r2_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Cargo Nose (Max 66) [cite: 5]</td>
+          <td class="left-text">Cargo Nose (Max 66)</td>
           <td>-</td>
           <td class="input-cell"><input type="number" id="cn_w" value="5"></td>
           <td class="fixed-cell">23.6</td>
           <td class="calc-cell" id="cn_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Cargo Cabin (Max 100) [cite: 5]</td>
+          <td class="left-text">Cargo Cabin (Max 100)</td>
           <td>-</td>
           <td class="input-cell"><input type="number" id="cc_w" value="20"></td>
           <td class="fixed-cell">153.1</td>
           <td class="calc-cell" id="cc_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Cargo Extend (Max 40) [cite: 5]</td>
+          <td class="left-text">Cargo Extend (Max 40)</td>
           <td>-</td>
           <td class="input-cell"><input type="number" id="ce_w" value="2"></td>
           <td class="fixed-cell">178.7</td>
           <td class="calc-cell" id="ce_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">De-ice Fluid (9.2 lbs/gal) [cite: 5]</td>
-          <td class="input-cell"><input type="number" id="di_g" value=""></td>
+          <td class="left-text">De-ice Fluid (9.2 lbs/gal)</td>
+          <td class="input-cell"><input type="number" id="di_g" value="0"></td>
           <td class="calc-cell" id="di_w">0</td>
           <td class="fixed-cell">39.4</td>
           <td class="calc-cell" id="di_m">0</td>
         </tr>
 
         <tr class="section-row">
-          [cite_start]<td colspan="2" class="left-text">Zero Fuel Condition (Max 3900) [cite: 23]</td>
+          <td colspan="2" class="left-text">Zero Fuel Condition (Max 3900)</td>
           <td class="calc-cell" id="zfw_w">0</td>
           <td class="calc-cell" id="zfw_cg">0</td>
           <td class="calc-cell" id="zfw_m">0</td>
         </tr>
 
         <tr>
-          [cite_start]<td class="left-text">Main Fuel Load (7.01 lbs/gal) [cite: 5]</td>
-          <td class="input-cell"><input type="number" id="mf_g" value=""></td>
+          <td class="left-text">Main Fuel Load (7.01 lbs/gal)</td>
+          <td class="input-cell"><input type="number" id="mf_g" value="50"></td>
           <td class="calc-cell" id="mf_w">0</td>
           <td class="fixed-cell">103.5</td>
           <td class="calc-cell" id="mf_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">AUX Fuel Load (7.01 lbs/gal) [cite: 5]</td>
+          <td class="left-text">AUX Fuel Load (7.01 lbs/gal)</td>
           <td class="input-cell"><input type="number" id="af_g" value="0"></td>
           <td class="calc-cell" id="af_w">0</td>
           <td class="fixed-cell">126.0</td>
           <td class="calc-cell" id="af_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">Runup/Taxi Burn off [cite: 5]</td>
+          <td class="left-text">Runup/Taxi Burn off</td>
           <td class="fixed-cell">-1.0</td>
           <td class="fixed-cell">-7.01</td>
           <td class="fixed-cell">103.5</td>
@@ -236,21 +232,21 @@
         </tr>
 
         <tr class="section-row">
-          [cite_start]<td colspan="2" class="left-text">Takeoff Condition (Max 4189) [cite: 5]</td>
+          <td colspan="2" class="left-text">Takeoff Condition (Max 4189)</td>
           <td class="calc-cell" id="tow_w">0</td>
           <td class="calc-cell" id="tow_cg">0</td>
           <td class="calc-cell" id="tow_m">0</td>
         </tr>
 
         <tr>
-          [cite_start]<td class="left-text">Main Fuel for Flight [cite: 5]</td>
-          <td class="input-cell"><input type="number" id="mff_g" value=""></td>
+          <td class="left-text">Main Fuel for Flight</td>
+          <td class="input-cell"><input type="number" id="mff_g" value="20"></td>
           <td class="calc-cell" id="mff_w">0</td>
           <td class="fixed-cell">103.5</td>
           <td class="calc-cell" id="mff_m">0</td>
         </tr>
         <tr>
-          [cite_start]<td class="left-text">AUX Fuel for Flight [cite: 5]</td>
+          <td class="left-text">AUX Fuel for Flight</td>
           <td class="input-cell"><input type="number" id="aff_g" value="0"></td>
           <td class="calc-cell" id="aff_w">0</td>
           <td class="fixed-cell">104.5</td>
@@ -258,7 +254,7 @@
         </tr>
 
         <tr class="section-row">
-          [cite_start]<td colspan="2" class="left-text">Landing Condition (Max 3979) [cite: 5]</td>
+          <td colspan="2" class="left-text">Landing Condition (Max 3979)</td>
           <td class="calc-cell" id="lw_w">0</td>
           <td class="calc-cell" id="lw_cg">0</td>
           <td class="calc-cell" id="lw_m">0</td>
@@ -285,7 +281,7 @@
   </div>
 
   <div style="margin-top: 50px;">
-    [cite_start]<h2 class="chart-title">Weight and Balance Chart [cite: 14]</h2>
+    <h2 class="chart-title">Weight and Balance Chart</h2>
     <div class="chart-wrapper">
       <div class="chart-container">
         <canvas id="wbChart"></canvas>
@@ -298,39 +294,39 @@
 document.addEventListener('DOMContentLoaded', function() {
   const ctx = document.getElementById('wbChart').getContext('2d');
   
-  [cite_start]// エンベロープ形状：前回の精密座標を維持 [cite: 1]
-  const envelopeData = [
-    {x: 92.52, y: 3197},
-    {x: 92.52, y: 3252},
-    {x: 94.61, y: 4189},
-    {x: 97.64, y: 4189},
-    {x: 97.64, y: 3748},
-    {x: 96.46, y: 3197},
-    {x: 92.52, y: 3197}
+  // エンベロープ精密座標の復旧 [cite: 16, 17, 28, 33]
+  const envelopePoints = [
+    {x: 92.52, y: 3197}, // 左下
+    {x: 92.52, y: 3252}, // 左縦線の長さ
+    {x: 94.61, y: 4189}, // 左斜線の終点
+    {x: 97.64, y: 4189}, // 右上
+    {x: 97.64, y: 3748}, // 右垂直線
+    {x: 96.46, y: 3197}, // 右下絞り込み
+    {x: 92.52, y: 3197}  // 閉じる
   ];
 
-  const chart = new Chart(ctx, {
+  const wbChart = new Chart(ctx, {
     type: 'scatter',
     data: {
       datasets: [
         {
           label: 'Envelope',
-          data: envelopeData,
+          data: envelopePoints,
           showLine: true, borderColor: '#000', borderWidth: 2, pointRadius: 0, fill: false, tension: 0, z: 5
         },
         {
           label: 'Max Zero Fuel',
           data: [{x: 92, y: 3900}, {x: 98, y: 3900}],
-          showLine: true, borderColor: 'red', borderDash: [5, 3], borderWidth: 1, pointRadius: 0
+          showLine: true, borderColor: 'red', borderDash: [5, 5], borderWidth: 1, pointRadius: 0
         },
         {
           label: 'MAX Landing Weight',
           data: [{x: 92, y: 3979}, {x: 98, y: 3979}],
-          showLine: true, borderColor: 'green', borderDash: [2, 2], borderWidth: 1, pointRadius: 0
+          showLine: true, borderColor: 'green', borderDash: [3, 3], borderWidth: 1, pointRadius: 0
         },
         {
           label: 'Flight States',
-          data: [], backgroundColor: 'blue', pointRadius: 6, pointHoverRadius: 8, z: 10
+          data: [], backgroundColor: 'blue', pointRadius: 7, pointHoverRadius: 9, z: 10
         }
       ]
     },
@@ -340,107 +336,112 @@ document.addEventListener('DOMContentLoaded', function() {
       scales: {
         x: { 
           min: 92.0, max: 98.0, 
-          grid: { color: '#e0e0e0', lineWidth: 1 },
           ticks: {
             stepSize: 0.5,
             callback: function(v) { return [92, 94, 96, 98].includes(v) ? v : ''; },
-            font: { size: 12, weight: 'bold' }
+            font: { weight: 'bold' }
           },
-          title: { display: true, text: 'C.G. [cite_start]Inches Aft of Datum [cite: 36]', font: { size: 13, weight: 'bold' } } 
+          title: { display: true, text: 'C.G. Inches Aft of Datum', font: { weight: 'bold' } }
         },
         y: { 
           min: 3100, max: 4200, 
-          grid: { color: '#e0e0e0', lineWidth: 1 },
           ticks: {
             stepSize: 100,
             callback: function(v) { return [3100, 3300, 3500, 3700, 3900, 4100].includes(v) ? v : ''; },
-            font: { size: 12, weight: 'bold' }
+            font: { weight: 'bold' }
           },
-          [cite_start]title: { display: true, text: 'Weight (lbs) [cite: 26]', font: { size: 13, weight: 'bold' } } 
+          title: { display: true, text: 'Weight (lbs)', font: { weight: 'bold' } }
         }
       },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (context) => context.raw.label + ": (" + context.raw.x.toFixed(2) + ", " + context.raw.y.toFixed(0) + ")"
+            label: (ctx) => `${ctx.raw.label}: (${ctx.raw.x.toFixed(2)} in, ${ctx.raw.y.toFixed(1)} lbs)`
           }
         }
       }
     }
   });
 
-  function getV(id) { return parseFloat(document.getElementById(id).value) || 0; }
-  function setT(id, val, dec = 0) { 
-    const el = document.getElementById(id);
-    if(el) el.innerText = val.toLocaleString(undefined, {minimumFractionDigits: dec, maximumFractionDigits: dec});
-  }
-
+  // 計算エンジンの復旧 [cite: 1, 2, 7]
   function calculate() {
-    const bw = getV('bew_weight'), ba = getV('bew_arm'), bm = bw * ba;
-    setT('bew_mom', bm, 0);
+    const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const setTxt = (id, val, dec = 0) => {
+      const el = document.getElementById(id);
+      if(el) el.innerText = val.toLocaleString(undefined, {minimumFractionDigits: dec, maximumFractionDigits: dec});
+    };
 
-    const items = [
-      {w: getV('p_w'), a: 90.6, id: 'p_m'},
-      {w: getV('fp_w'), a: 90.6, id: 'fp_m'},
-      {w: getV('r1_w'), a: 128.0, id: 'r1_m'},
-      {w: getV('r2_w'), a: 128.0, id: 'r2_m'},
-      {w: getV('cn_w'), a: 23.6, id: 'cn_m'},
-      {w: getV('cc_w'), a: 153.1, id: 'cc_m'},
-      {w: getV('ce_w'), a: 178.7, id: 'ce_m'}
-    ];
-    let pW = 0, pM = 0;
-    items.forEach(i => {
-      const m = i.w * i.a; setT(i.id, m, 0); pW += i.w; pM += m;
-    });
+    // 1. BEW
+    const bw = getVal('bew_weight'), ba = getVal('bew_arm'), bm = bw * ba;
+    setTxt('bew_mom', bm);
 
-    const diW = getV('di_g') * 9.2, diM = diW * 39.4;
-    setT('di_w', diW, 1); setT('di_m', diM, 0);
+    // 2. Passengers & Cargo
+    const pW = getVal('p_w') + getVal('fp_w'), pM = pW * 90.6;
+    setTxt('p_m', getVal('p_w') * 90.6); setTxt('fp_m', getVal('fp_w') * 90.6);
 
-    const zfwW = bw + pW + diW, zfwM = bm + pM + diM;
+    const rW = getVal('r1_w') + getVal('r2_w'), rM = rW * 128.0;
+    setTxt('r1_m', getVal('r1_w') * 128.0); setTxt('r2_m', getVal('r2_w') * 128.0);
+
+    const cnW = getVal('cn_w'), cnM = cnW * 23.6; setTxt('cn_m', cnM);
+    const ccW = getVal('cc_w'), ccM = ccW * 153.1; setTxt('cc_m', ccM);
+    const ceW = getVal('ce_w'), ceM = ceW * 178.7; setTxt('ce_m', ceM);
+
+    // 3. De-ice
+    const diW = getVal('di_g') * 9.2, diM = diW * 39.4;
+    setTxt('di_w', diW, 1); setTxt('di_m', diM);
+
+    // 4. Zero Fuel Condition
+    const zfwW = bw + pW + rW + cnW + ccW + ceW + diW;
+    const zfwM = bm + pM + rM + cnM + ccM + ceM + diM;
     const zfwCG = zfwW > 0 ? zfwM / zfwW : 0;
-    setT('zfw_w', zfwW, 1); setT('zfw_m', zfwM, 0); setT('zfw_cg', zfwCG, 2);
+    setTxt('zfw_w', zfwW, 1); setTxt('zfw_m', zfwM); setTxt('zfw_cg', zfwCG, 2);
 
-    const mfW = getV('mf_g') * 7.01, mfM = mfW * 103.5;
-    setT('mf_w', mfW, 1); setT('mf_m', mfM, 0);
-    const afW = getV('af_g') * 7.01, afM = afW * 126.0;
-    setT('af_w', afW, 1); setT('af_m', afM, 0);
+    // 5. Fuel & Takeoff
+    const mfW = getVal('mf_g') * 7.01, mfM = mfW * 103.5;
+    const afW = getVal('af_g') * 7.01, afM = afW * 126.0;
+    setTxt('mf_w', mfW, 1); setTxt('mf_m', mfM);
+    setTxt('af_w', afW, 1); setTxt('af_m', afM);
 
-    const towW = zfwW + mfW + afW - 7.01, towM = zfwM + mfM + afM - 726;
+    const towW = zfwW + mfW + afW - 7.01; // -1 gal for taxi
+    const towM = zfwM + mfM + afM - 726;
     const towCG = towW > 0 ? towM / towW : 0;
-    setT('tow_w', towW, 1); setT('tow_m', towM, 0); setT('tow_cg', towCG, 2);
+    setTxt('tow_w', towW, 1); setTxt('tow_m', towM); setTxt('tow_cg', towCG, 2);
 
-    const mffW = getV('mff_g') * 7.01, mffM = mffW * 103.5;
-    setT('mff_w', -mffW, 1); setT('mff_m', -mffM, 0);
-    const affW = getV('aff_g') * 7.01, affM = affW * 104.5;
-    setT('aff_w', -affW, 1); setT('aff_m', -affM, 0);
+    // 6. Flight Burn & Landing
+    const fbfW = (getVal('mff_g') + getVal('aff_g')) * 7.01;
+    const fbfM = (getVal('mff_g') * 103.5) + (getVal('aff_g') * 104.5);
+    setTxt('mff_w', -(getVal('mff_g') * 7.01), 1); setTxt('mff_m', -(getVal('mff_g') * 103.5));
+    setTxt('aff_w', -(getVal('aff_g') * 7.01), 1); setTxt('aff_m', -(getVal('aff_g') * 104.5));
 
-    const lwW = towW - mffW - affW, lwM = towM - mffM - affM;
+    const lwW = towW - fbfW, lwM = towM - fbfM;
     const lwCG = lwW > 0 ? lwM / lwW : 0;
-    setT('lw_w', lwW, 1); setT('lw_m', lwM, 0); setT('lw_cg', lwCG, 2);
+    setTxt('lw_w', lwW, 1); setTxt('lw_m', lwM); setTxt('lw_cg', lwCG, 2);
 
+    // Result Summary
     document.getElementById('res_tow').innerText = towW.toFixed(1) + " lbs";
     document.getElementById('res_lw').innerText = lwW.toFixed(1) + " lbs";
     document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
 
-    const ts = document.getElementById('res_tow_status');
-    ts.innerText = towW > 4189 ? "OVERWEIGHT!" : "Within Limits";
-    ts.className = towW > 4189 ? "status-alert" : "status-ok";
+    const towS = document.getElementById('res_tow_status');
+    towS.innerText = towW > 4189 ? "OVERWEIGHT!" : "Within Limits";
+    towS.className = towW > 4189 ? "status-alert" : "status-ok";
 
-    const ls = document.getElementById('res_lw_status');
-    ls.innerText = lwW > 3979 ? "OVERWEIGHT!" : "Within Limits";
-    ls.className = lwW > 3979 ? "status-alert" : "status-ok";
+    const lwS = document.getElementById('res_lw_status');
+    lwS.innerText = lwW > 3979 ? "OVERWEIGHT!" : "Within Limits";
+    lwS.className = lwW > 3979 ? "status-alert" : "status-ok";
 
-    chart.data.datasets[3].data = [
+    // Chart Update
+    wbChart.data.datasets[3].data = [
       {x: zfwCG, y: zfwW, label: 'ZFW'},
       {x: towCG, y: towW, label: 'TOW'},
       {x: lwCG, y: lwW, label: 'LDG'}
     ];
-    chart.update();
+    wbChart.update();
   }
 
   document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculate));
-  calculate();
+  calculate(); // 初期実行
 });
 </script>
 
