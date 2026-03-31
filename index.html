@@ -2,62 +2,86 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator</title>
+<title>DA42NG Weight & Balance Calculator Ver2 Test run</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <style>
   :root {
     --primary-color: #0078D4;
-    --bg-color: #f4f7f9;
-    --card-bg: #ffffff;
-    --text-main: #1a1a1a;
     --input-bg: #fff9c4;
-    --border-color: #ddd;
     --alert-color: #d32f2f;
-    --safe-color: #388e3c;
+    --safe-color: #28a745;
   }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: var(--bg-color);
-    margin: 0;
-    padding: 20px;
-    color: var(--text-main);
+  /* -------------------------------------
+     ベーススタイル（参考デザインに準拠）
+  ------------------------------------- */
+  body { 
+    font-family: Arial, sans-serif; 
+    color: #333; 
+    max-width: 900px; 
+    margin: 0 auto; 
+    padding: 20px; 
+    background-color: #fff; 
   }
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  h2.main-title { 
+    text-align: center; 
+    font-weight: normal; 
+    border-bottom: 2px solid #0078D4; 
+    padding-bottom: 15px; 
+    margin-bottom: 20px; 
+    letter-spacing: 1px; 
+    color: #0078D4; 
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: #777;
+    margin-left: 10px;
   }
 
-  header {
-    margin-bottom: 25px;
-    border-bottom: 3px solid var(--primary-color);
-    padding-bottom: 10px;
+  /* カードレイアウト（参考デザインに準拠） */
+  .card { 
+    border-left: 4px solid #0078D4; 
+    border-top: 1px solid #eee; 
+    border-right: 1px solid #eee; 
+    border-bottom: 1px solid #eee; 
+    padding: 20px; 
+    margin-bottom: 25px; 
+    border-radius: 0 4px 4px 0; 
+    background-color: #fff;
+  }
+  .card h3 { 
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    margin: 0 0 15px 0; 
+    font-size: 20px; 
+    color: #0078D4; 
+    border-bottom: 1px dashed #eee; 
+    padding-bottom: 10px; 
   }
 
-  header h1 { margin: 0; color: var(--primary-color); font-size: 22px; }
-
+  /* -------------------------------------
+     テーブル部分（指定通り色は絶対に変更しない）
+  ------------------------------------- */
   .wb-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 30px;
     font-size: 14px;
   }
   .wb-table th, .wb-table td {
-    border: 1px solid var(--border-color);
+    border: 1px solid #ddd;
     padding: 10px 12px;
     text-align: right;
   }
-  .wb-table th { background: #f0f0f0; font-weight: bold; text-align: center; }
+  .wb-table th { background: #f0f0f0; font-weight: bold; text-align: center; color: #333; }
   .wb-table th.left-align { text-align: left; }
-  .input-cell { background-color: var(--input-bg); width: 100px; padding: 0; }
   
+  /* 入力・計算セルの配色 */
+  .input-cell { background-color: var(--input-bg); width: 100px; padding: 0; }
   .input-cell input::-webkit-outer-spin-button,
   .input-cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .input-cell input[type=number] {
@@ -66,54 +90,56 @@
     text-align: right; font-size: 15px; font-weight: bold; padding: 10px 12px;
     box-sizing: border-box; outline: none;
   }
-
   .calc-cell { background-color: #ffffff; font-weight: bold; }
   .fixed-cell { background-color: #fafafa; color: #666; }
   .section-row td { background-color: #f5f5f5; font-weight: bold; border-top: 2px solid #aaa; }
   .left-text { text-align: left !important; }
 
+  /* -------------------------------------
+     計算結果部分
+  ------------------------------------- */
   .result-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
     margin-top: 30px;
+    flex-wrap: wrap;
   }
-  .result-card {
-    background: #fff; border: 1px solid #ddd; padding: 20px;
-    border-radius: 8px; text-align: center;
-  }
-  .result-card .value { font-size: 28px; font-weight: bold; display: block; }
-  .status-ok { color: var(--safe-color); font-weight: bold; }
-  .status-alert { color: var(--alert-color); font-weight: bold; }
-
-  .chart-section {
-    margin-top: 50px;
-  }
-  h2.chart-title {
-    font-size: 20px;
+  .result-summary .card {
+    flex: 1;
+    min-width: 200px;
     text-align: center;
-    margin-bottom: 5px;
-    font-weight: bold;
-    text-decoration: underline;
+    padding: 15px;
+    margin-bottom: 0;
   }
-  
+  .result-summary .card .value { 
+    font-size: 28px; 
+    font-weight: bold; 
+    display: block; 
+    margin-bottom: 5px;
+    color: #333;
+  }
+  .status-ok { color: var(--safe-color); font-weight: bold; font-size: 14px; }
+  .status-alert { color: var(--alert-color); font-weight: bold; font-size: 14px; }
+
+  /* -------------------------------------
+     チャート部分
+  ------------------------------------- */
   .chart-wrapper {
     position: relative;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    border: 3px solid #000;
+    border: 3px solid #333;
     background: white;
     padding: 0;
   }
-   
   .chart-container {
     position: relative;
     width: 100%;
     padding-bottom: 68%; 
     height: 0;
   }
-
   #wbChart {
     position: absolute;
     top: 0;
@@ -132,18 +158,10 @@
     font-family: Arial, sans-serif;
     font-size: 12px;
     z-index: 10;
+    border: 1px solid #ddd;
   }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-  }
-  .legend-line {
-    width: 30px;
-    height: 0;
-    margin-right: 8px;
-    border-top-width: 3px;
-  }
+  .legend-item { display: flex; align-items: center; margin-bottom: 4px; color: #333; }
+  .legend-line { width: 30px; height: 0; margin-right: 8px; border-top-width: 3px; }
   .l-env { border-top-style: solid; border-top-color: #444; border-top-width: 5px; }
   .l-zfw { border-top-style: dashed; border-top-color: red; border-top-width: 2px; }
   .l-ldg { border-top-style: dotted; border-top-color: #0078D4; border-top-width: 3px; }
@@ -151,11 +169,9 @@
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <h1>DA42NG Weight & Balance Calculator</h1>
-    <p>Test run</p>
-  </header>
+  <h2 class="main-title">
+    DA42NG Weight & Balance Calculator <span class="subtitle">Test run</span>
+  </h2>
 
   <form id="wbForm">
     <table class="wb-table">
@@ -290,24 +306,24 @@
   </form>
 
   <div class="result-summary">
-    <div class="result-card">
+    <div class="card">
       <h3>Takeoff Weight</h3>
       <span class="value" id="res_tow">0 lbs</span>
       <span id="res_tow_status" class="status-ok">Within Limits</span>
     </div>
-    <div class="result-card">
+    <div class="card">
       <h3>Landing Weight</h3>
       <span class="value" id="res_lw">0 lbs</span>
       <span id="res_lw_status" class="status-ok">Within Limits</span>
     </div>
-    <div class="result-card">
+    <div class="card">
       <h3>Takeoff C.G.</h3>
       <span class="value" id="res_cg">0 in</span>
     </div>
   </div>
 
-  <div class="chart-section">
-    <h2 class="chart-title">Weight and Balance Chart</h2>
+  <div class="card" style="margin-top: 30px;">
+    <h3>Weight and Balance Chart</h3>
     <div class="chart-wrapper">
       <div class="chart-legend-overlay">
         <div class="legend-item"><div class="legend-line l-env"></div>Envelope</div>
@@ -319,7 +335,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -329,15 +344,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const ctx = document.getElementById('wbChart').getContext('2d');
   
-  // ★正確なデータに基づきエンベロープ座標を修正★
   const envelopePoints = [
-    {x: 92.52, y: 3197}, // 前方限界 始点
-    {x: 92.52, y: 3236}, // 前方限界 折れ点 (1468kg)
-    {x: 95.20, y: 4189}, // 前方限界 MTOM
-    {x: 97.64, y: 4189}, // 後方限界 MTOM (水平線)
-    {x: 97.64, y: 3748}, // 後方限界 折れ点 (1700kg)
-    {x: 96.61, y: 3197}, // 後方限界 終点 (1450kg)
-    {x: 92.52, y: 3197}  // 閉じる
+    {x: 92.52, y: 3197},
+    {x: 92.52, y: 3236},
+    {x: 95.20, y: 4189},
+    {x: 97.64, y: 4189},
+    {x: 97.64, y: 3748},
+    {x: 96.61, y: 3197},
+    {x: 92.52, y: 3197} 
   ];
 
   const wbChart = new Chart(ctx, {
