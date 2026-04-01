@@ -502,11 +502,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const minutesNeeded = Math.ceil(gallonsNeeded) * 6; // 1gal単位（6分単位）に切り上げ
       
       document.getElementById('res_burn_time').innerText = minutesNeeded + " Min";
-      document.getElementById('res_burn_status').innerText = "To reach Max LDG Wt";
+      document.getElementById('res_burn_status').innerText = "To reach Max LDG Weight";
       document.getElementById('res_burn_status').className = "status-alert";
     } else {
       document.getElementById('res_burn_time').innerText = "0 Min";
-      document.getElementById('res_burn_status').innerText = "Under Max LDG Wt";
+      document.getElementById('res_burn_status').innerText = "Under Max LDG Weight";
       document.getElementById('res_burn_status').className = "status-ok";
     }
 
