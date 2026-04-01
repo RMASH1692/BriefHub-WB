@@ -317,8 +317,9 @@
       <span id="res_lw_status" class="status-ok">Within Limits</span>
     </div>
     <div class="card">
-      <h3>Takeoff C.G.</h3>
-      <span class="value" id="res_cg">0 in</span>
+      <h3>Req. Flight Time</h3>
+      <span class="value" id="res_burn_time">0 Min</span>
+      <span id="res_burn_status" class="status-ok">Under Max LDG Wt</span>
     </div>
   </div>
 
@@ -492,7 +493,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('res_tow').innerText = towW.toFixed(1) + " lbs";
     document.getElementById('res_lw').innerText = lwW.toFixed(1) + " lbs";
-    document.getElementById('res_cg').innerText = towCG.toFixed(2) + " in";
+
+    // 変更箇所：T/O CGの代わりに要求飛行時間を計算
+    const maxLdgWeight = 3979; // DA42NG Max Landing Weight
+    if (towW > maxLdgWeight) {
+      const excessWeight = towW - maxLdgWeight;
+      const gallonsNeeded = excessWeight / 7.01; // 1gal = 7.01 lbsとして計算
+      const minutesNeeded = Math.ceil(gallonsNeeded) * 6; // 1gal単位（6分単位）に切り上げ
+      
+      document.getElementById('res_burn_time').innerText = minutesNeeded + " Min";
+      document.getElementById('res_burn_status').innerText = "To reach Max LDG Wt";
+      document.getElementById('res_burn_status').className = "status-alert";
+    } else {
+      document.getElementById('res_burn_time').innerText = "0 Min";
+      document.getElementById('res_burn_status').innerText = "Under Max LDG Wt";
+      document.getElementById('res_burn_status').className = "status-ok";
+    }
 
     const towS = document.getElementById('res_tow_status');
     towS.innerText = towW > 4189 ? "OVERWEIGHT!" : "Within Limits";
