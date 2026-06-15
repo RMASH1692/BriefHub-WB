@@ -861,7 +861,7 @@ const AIRCRAFT_PRESETS = {
   },
 
   DA42_NG_VI: {
-    label: "DA42 NG-Ⅵ",
+    label: "DA42_NG_VI",
     mode: "Public",
     arms: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
     limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 3891 },
@@ -901,7 +901,7 @@ const AIRCRAFT_PRESETS = {
       noseBaggageLbs: 6,
       cabinBaggageLbs: 33,
       baggageExtensionLbs: 11,
-      deiceL: 0,
+      deiceGal: 6,
       taxiFuelGal: 1
     }
   },
@@ -915,11 +915,24 @@ const AIRCRAFT_PRESETS = {
       noseBaggageLbs: 6,
       cabinBaggageLbs: 20,
       baggageExtensionLbs: 2,
-      deiceL: 0,
+      deiceGal: 6,
       taxiFuelGal: 1
     }
   },
-  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG_VI", inputDefaults: {} },
+  JA11HA: {
+    label: "JA999U",
+    mode: "JFOU / 鹿児島",
+    inherit: "DA42_NG_VI",
+    inputDefaults: {
+      basicEmptyWeightLbs: 3406.1,
+      basicEmptyArm: 95.8,
+      noseBaggageLbs: 10,
+      cabinBaggageLbs: 12,
+      baggageExtensionLbs: 2,
+      deiceGal: 6,
+      taxiFuelGal: 1
+    }
+  },
   JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_TDI", inputDefaults: {} },
   JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_TDI", inputDefaults: {} }
 };
