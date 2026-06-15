@@ -426,7 +426,7 @@
 
       <button type="button" class="select-button" onclick="showPasswordScreen()">
         <div class="main">JFOU</div>
-        <div class="sub">パスワードが必要です。</div>
+        <div class="sub">Password required</div>
       </button>
     </div>
   </div>
@@ -761,10 +761,10 @@ const AIRCRAFT_PRESETS = {
   DA42_TDI: {
     label: "DA42 TDI",
     mode: "Public",
-    arms: { frontSeat: null, rearSeat: null, noseBaggage: null, cabinBaggage: null, baggageExtension: null, fuel: null, deice: null },
-    limits: { mtowLbs: null, mlwLbs: null, mzfwLbs: null },
-    fuel: { lbsPerGal: null },
-    deice: { lbsPerL: null },
+    arms: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
+    limits: { mtowLbs: 3935, mlwLbs: 3748, mzfwLbs: 3638 },
+    fuel: { lbsPerGal: 7.01 },
+    deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
     envelope: [],
     chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
@@ -774,10 +774,10 @@ const AIRCRAFT_PRESETS = {
     label: "DA42 NG",
     mode: "Public",
     arms: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
-    limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 3900 },
+    limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 3891 },
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: 9.2 / 3.785411784 },
-    basicEmpty: { weightLbs: 3147.1, arm: 94.7 },
+    basicEmpty: { weightLbs: null, arm: null },
     envelope: [
       {x: 92.52, y: 3197}, {x: 92.52, y: 3236}, {x: 95.20, y: 4189},
       {x: 97.64, y: 4189}, {x: 97.64, y: 3748}, {x: 96.61, y: 3197}, {x: 92.52, y: 3197}
@@ -788,25 +788,25 @@ const AIRCRAFT_PRESETS = {
   DA42_NG_VI: {
     label: "DA42 NG-Ⅵ",
     mode: "Public",
-    arms: { frontSeat: null, rearSeat: null, noseBaggage: null, cabinBaggage: null, baggageExtension: null, fuel: null, deice: null },
-    limits: { mtowLbs: null, mlwLbs: null, mzfwLbs: null },
-    fuel: { lbsPerGal: null },
-    deice: { lbsPerL: null },
+    arms: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
+    limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 389l },
+    fuel: { lbsPerGal: 7.01 },
+    deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
     envelope: [],
     chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
   },
 
-  JA52DA: { label: "JA52DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
-  JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+  JA52DA: { label: "JA52DA", mode: "JFOU / 福島", inherit: "DA42_TDI" },
+  JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_TDI" },
   JA55DA: { label: "JA55DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
-  JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+  JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG_VI" },
   JA224T: { label: "JA224T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
   JA926T: { label: "JA926T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
   JA999U: { label: "JA999U", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
-  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
-  JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_NG" },
-  JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_NG" }
+  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG_VI" },
+  JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_TDI" },
+  JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_TDI" }
 };
 
 let currentPreset = null;
@@ -873,8 +873,6 @@ function openCalculator(key) {
   currentPreset = resolvePreset(key);
   if (!currentPreset) { alert("Preset not found."); return; }
 
-  // iPhone Safari対策：非表示状態のcanvasでChart.jsを初期化すると
-  // 画面遷移前に処理が止まることがあるため、先に画面を表示する。
   showScreen("calculatorScreen");
 
   applyPreset(currentPreset);
