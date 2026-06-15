@@ -31,9 +31,7 @@
     max-width: 1060px;
     margin: 0 auto;
     padding: 22px;
-    background:
-      radial-gradient(circle at top left, rgba(0,120,212,0.08), transparent 34%),
-      #fff;
+    background: #fff;
   }
 
   h2.main-title {
@@ -60,9 +58,9 @@
     border-left: 4px solid var(--primary);
     padding: 20px;
     margin-bottom: 24px;
-    border-radius: 0 14px 14px 0;
+    border-radius: 0 10px 10px 0;
     background: rgba(255,255,255,0.96);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
   }
 
   .card h3 {
@@ -203,21 +201,13 @@
   details[open] summary::after { content: "Tap to close"; }
 
   .form-section-title {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin: 22px 0 12px;
+    margin: 24px 0 12px;
     color: var(--primary-dark);
     font-weight: 800;
     letter-spacing: 0.2px;
-  }
-
-  .form-section-title::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--primary);
+    font-size: 15px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 7px;
   }
 
   .input-grid {
@@ -229,9 +219,9 @@
   .input-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .field {
-    background: linear-gradient(180deg, #fff, #fbfdff);
+    background: #fff;
     border: 1px solid var(--input-border);
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 12px;
     min-width: 0;
   }
@@ -291,7 +281,7 @@
     font-size: 14px;
     overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .wb-table th,
@@ -319,6 +309,14 @@
 
   .status-ok { color: var(--safe); font-weight: 800; }
   .status-alert { color: var(--alert); font-weight: 800; }
+
+  .section-row td {
+    background: #f8fafc;
+    font-weight: 800;
+    border-top: 2px solid #cbd5e1;
+  }
+
+  .blank-cell { color: var(--text-sub); }
 
   .result-summary {
     display: grid;
@@ -576,22 +574,163 @@
 
   <div class="card">
     <h3>Calculation Result</h3>
-    <table class="wb-table">
+    <table class="wb-table result-table">
       <thead>
         <tr>
-          <th>Condition</th>
+          <th>Position / Condition</th>
+          <th>Qty</th>
           <th>Weight (kg)</th>
           <th>Weight (lbs)</th>
-          <th>CG (in)</th>
-          <th>Moment</th>
+          <th>Arm / CG (in)</th>
+          <th>Moment (in-lbs)</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>Zero Fuel</td><td id="result_zfw_kg">0</td><td id="result_zfw_lbs">0</td><td id="result_zfw_cg">0</td><td id="result_zfw_moment">0</td><td id="result_zfw_status" class="status-ok">-</td></tr>
-        <tr><td>Ramp</td><td id="result_ramp_kg">0</td><td id="result_ramp_lbs">0</td><td id="result_ramp_cg">0</td><td id="result_ramp_moment">0</td><td id="result_ramp_status">-</td></tr>
-        <tr><td>Takeoff</td><td id="result_tow_kg">0</td><td id="result_tow_lbs">0</td><td id="result_tow_cg">0</td><td id="result_tow_moment">0</td><td id="result_tow_status" class="status-ok">-</td></tr>
-        <tr><td>Landing</td><td id="result_ldg_kg">0</td><td id="result_ldg_lbs">0</td><td id="result_ldg_cg">0</td><td id="result_ldg_moment">0</td><td id="result_ldg_status" class="status-ok">-</td></tr>
+        <tr>
+          <td>Basic Empty Weight</td>
+          <td class="blank-cell">-</td>
+          <td id="res_bew_kg">0</td>
+          <td id="res_bew_lbs">0</td>
+          <td id="res_bew_arm">0</td>
+          <td id="res_bew_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Front seat L</td>
+          <td class="blank-cell">-</td>
+          <td id="res_frontL_kg">0</td>
+          <td id="res_frontL_lbs">0</td>
+          <td id="res_frontL_arm">0</td>
+          <td id="res_frontL_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Front seat R</td>
+          <td class="blank-cell">-</td>
+          <td id="res_frontR_kg">0</td>
+          <td id="res_frontR_lbs">0</td>
+          <td id="res_frontR_arm">0</td>
+          <td id="res_frontR_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Rear seat L</td>
+          <td class="blank-cell">-</td>
+          <td id="res_rearL_kg">0</td>
+          <td id="res_rearL_lbs">0</td>
+          <td id="res_rearL_arm">0</td>
+          <td id="res_rearL_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Rear seat R</td>
+          <td class="blank-cell">-</td>
+          <td id="res_rearR_kg">0</td>
+          <td id="res_rearR_lbs">0</td>
+          <td id="res_rearR_arm">0</td>
+          <td id="res_rearR_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Nose baggage</td>
+          <td class="blank-cell">-</td>
+          <td id="res_nose_kg">0</td>
+          <td id="res_nose_lbs">0</td>
+          <td id="res_nose_arm">0</td>
+          <td id="res_nose_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Cabin baggage</td>
+          <td class="blank-cell">-</td>
+          <td id="res_cabin_kg">0</td>
+          <td id="res_cabin_lbs">0</td>
+          <td id="res_cabin_arm">0</td>
+          <td id="res_cabin_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>Baggage extension</td>
+          <td class="blank-cell">-</td>
+          <td id="res_extension_kg">0</td>
+          <td id="res_extension_lbs">0</td>
+          <td id="res_extension_arm">0</td>
+          <td id="res_extension_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr>
+          <td>De-ice fluid</td>
+          <td><span id="res_deice_qty">0</span> L</td>
+          <td id="res_deice_kg">0</td>
+          <td id="res_deice_lbs">0</td>
+          <td id="res_deice_arm">0</td>
+          <td id="res_deice_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr class="section-row">
+          <td>Zero Fuel Condition</td>
+          <td class="blank-cell">-</td>
+          <td id="result_zfw_kg">0</td>
+          <td id="result_zfw_lbs">0</td>
+          <td id="result_zfw_cg">0</td>
+          <td id="result_zfw_moment">0</td>
+          <td id="result_zfw_status" class="status-ok">-</td>
+        </tr>
+        <tr>
+          <td>Main fuel</td>
+          <td><span id="res_mainFuel_qty">0</span> US gal</td>
+          <td id="res_mainFuel_kg">0</td>
+          <td id="res_mainFuel_lbs">0</td>
+          <td id="res_mainFuel_arm">0</td>
+          <td id="res_mainFuel_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr class="section-row">
+          <td>Ramp Condition</td>
+          <td class="blank-cell">-</td>
+          <td id="result_ramp_kg">0</td>
+          <td id="result_ramp_lbs">0</td>
+          <td id="result_ramp_cg">0</td>
+          <td id="result_ramp_moment">0</td>
+          <td id="result_ramp_status">-</td>
+        </tr>
+        <tr>
+          <td>Taxi fuel</td>
+          <td><span id="res_taxiFuel_qty">0</span> US gal</td>
+          <td id="res_taxiFuel_kg">0</td>
+          <td id="res_taxiFuel_lbs">0</td>
+          <td id="res_taxiFuel_arm">0</td>
+          <td id="res_taxiFuel_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr class="section-row">
+          <td>Takeoff Condition</td>
+          <td class="blank-cell">-</td>
+          <td id="result_tow_kg">0</td>
+          <td id="result_tow_lbs">0</td>
+          <td id="result_tow_cg">0</td>
+          <td id="result_tow_moment">0</td>
+          <td id="result_tow_status" class="status-ok">-</td>
+        </tr>
+        <tr>
+          <td>Trip fuel</td>
+          <td><span id="res_tripFuel_qty">0</span> US gal</td>
+          <td id="res_tripFuel_kg">0</td>
+          <td id="res_tripFuel_lbs">0</td>
+          <td id="res_tripFuel_arm">0</td>
+          <td id="res_tripFuel_moment">0</td>
+          <td class="blank-cell">-</td>
+        </tr>
+        <tr class="section-row">
+          <td>Landing Condition</td>
+          <td class="blank-cell">-</td>
+          <td id="result_ldg_kg">0</td>
+          <td id="result_ldg_lbs">0</td>
+          <td id="result_ldg_cg">0</td>
+          <td id="result_ldg_moment">0</td>
+          <td id="result_ldg_status" class="status-ok">-</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -912,6 +1051,70 @@ function calculateWB() {
   const mainFuelM = moment(mainFuelW, a.fuel);
   const taxiFuelM = moment(taxiFuelW, a.fuel);
   const tripFuelM = moment(tripFuelW, a.fuel);
+
+  setText("res_bew_kg", lbsToKg(bewW), 1);
+  setText("res_bew_lbs", bewW, 1);
+  setText("res_bew_arm", bewArm, 1);
+  setText("res_bew_moment", bewM, 0);
+
+  setText("res_frontL_kg", lbsToKg(frontLW), 1);
+  setText("res_frontL_lbs", frontLW, 1);
+  setText("res_frontL_arm", a.frontSeat, 1);
+  setText("res_frontL_moment", frontLM, 0);
+
+  setText("res_frontR_kg", lbsToKg(frontRW), 1);
+  setText("res_frontR_lbs", frontRW, 1);
+  setText("res_frontR_arm", a.frontSeat, 1);
+  setText("res_frontR_moment", frontRM, 0);
+
+  setText("res_rearL_kg", lbsToKg(rearLW), 1);
+  setText("res_rearL_lbs", rearLW, 1);
+  setText("res_rearL_arm", a.rearSeat, 1);
+  setText("res_rearL_moment", rearLM, 0);
+
+  setText("res_rearR_kg", lbsToKg(rearRW), 1);
+  setText("res_rearR_lbs", rearRW, 1);
+  setText("res_rearR_arm", a.rearSeat, 1);
+  setText("res_rearR_moment", rearRM, 0);
+
+  setText("res_nose_kg", lbsToKg(noseW), 1);
+  setText("res_nose_lbs", noseW, 1);
+  setText("res_nose_arm", a.noseBaggage, 1);
+  setText("res_nose_moment", noseM, 0);
+
+  setText("res_cabin_kg", lbsToKg(cabinW), 1);
+  setText("res_cabin_lbs", cabinW, 1);
+  setText("res_cabin_arm", a.cabinBaggage, 1);
+  setText("res_cabin_moment", cabinM, 0);
+
+  setText("res_extension_kg", lbsToKg(extensionW), 1);
+  setText("res_extension_lbs", extensionW, 1);
+  setText("res_extension_arm", a.baggageExtension, 1);
+  setText("res_extension_moment", extensionM, 0);
+
+  setText("res_deice_qty", getNumber("deice_L"), 1);
+  setText("res_deice_kg", lbsToKg(deiceW), 1);
+  setText("res_deice_lbs", deiceW, 1);
+  setText("res_deice_arm", a.deice, 1);
+  setText("res_deice_moment", deiceM, 0);
+
+  setText("res_mainFuel_qty", getNumber("mainFuel_gal"), 1);
+  setText("res_mainFuel_kg", lbsToKg(mainFuelW), 1);
+  setText("res_mainFuel_lbs", mainFuelW, 1);
+  setText("res_mainFuel_arm", a.fuel, 1);
+  setText("res_mainFuel_moment", mainFuelM, 0);
+
+  setText("res_taxiFuel_qty", getNumber("taxiFuel_gal"), 1);
+  setText("res_taxiFuel_kg", -lbsToKg(taxiFuelW), 1);
+  setText("res_taxiFuel_lbs", -taxiFuelW, 1);
+  setText("res_taxiFuel_arm", a.fuel, 1);
+  setText("res_taxiFuel_moment", -taxiFuelM, 0);
+
+  setText("res_tripFuel_qty", getNumber("tripFuel_gal"), 1);
+  setText("res_tripFuel_kg", -lbsToKg(tripFuelW), 1);
+  setText("res_tripFuel_lbs", -tripFuelW, 1);
+  setText("res_tripFuel_arm", a.fuel, 1);
+  setText("res_tripFuel_moment", -tripFuelM, 0);
 
   const zfwW = bewW + frontLW + frontRW + rearLW + rearRW + noseW + cabinW + extensionW + deiceW;
   const zfwM = bewM + frontLM + frontRM + rearLM + rearRM + noseM + cabinM + extensionM + deiceM;
