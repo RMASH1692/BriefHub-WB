@@ -182,23 +182,24 @@
     padding-bottom: 6px;
   }
 
-  details.preset-card { border-left-color: #64748b; }
-  details summary {
+  details.preset-card { border-left-color: var(--primary); }
+  details.preset-card summary {
     cursor: pointer;
-    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 18px 0;
+    padding-bottom: 11px;
+    border-bottom: 1px dashed var(--border);
     color: var(--primary);
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
     list-style: none;
   }
-  details summary::-webkit-details-marker { display: none; }
-  details summary::after {
-    content: "Tap to expand";
-    float: right;
-    font-size: 12px;
-    color: var(--text-sub);
-    font-weight: 600;
-  }
-  details[open] summary::after { content: "Tap to close"; }
+  details.preset-card summary::-webkit-details-marker { display: none; }
+  details.preset-card summary::marker { content: ""; }
+  details.preset-card summary::after { content: ""; display: none; }
 
   .form-section-title {
     margin: 24px 0 12px;
@@ -400,7 +401,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta</span>
+  <span class="subtitle">Beta v4</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -789,7 +790,7 @@ const AIRCRAFT_PRESETS = {
     label: "DA42 NG-Ⅵ",
     mode: "Public",
     arms: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
-    limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 389l },
+    limits: { mtowLbs: 4189, mlwLbs: 3979, mzfwLbs: 3891 },
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
