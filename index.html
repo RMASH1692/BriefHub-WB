@@ -406,7 +406,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v5</span>
+  <span class="subtitle">Beta v6</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -417,17 +417,14 @@
     <div class="select-grid">
       <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_TDI')">
         <div class="main">DA42 TDI</div>
-        <div class="sub">通常W&Bへ進みます</div>
       </button>
 
       <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_NG')">
         <div class="main">DA42 NG</div>
-        <div class="sub">通常W&Bへ進みます</div>
       </button>
 
       <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_NG_VI')">
         <div class="main">DA42 NG-Ⅵ</div>
-        <div class="sub">通常W&Bへ進みます</div>
       </button>
 
       <button type="button" class="select-button" onclick="showPasswordScreen()">
@@ -554,7 +551,7 @@
       <div class="field"><label>Basic Empty Arm</label><input type="number" id="bew_arm" step="0.1"><span class="unit">in</span></div>
     </div>
 
-    <div class="form-section-title">Crew / Passenger</div>
+    <div class="form-section-title">Pilot / Passenger</div>
     <div class="input-grid">
       <div class="field">
         <label>Front seat L</label>
@@ -875,7 +872,20 @@ const AIRCRAFT_PRESETS = {
   JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_TDI", inputDefaults: {} },
   JA55DA: { label: "JA55DA", mode: "JFOU / 福島", inherit: "DA42_NG", inputDefaults: {} },
   JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG_VI", inputDefaults: {} },
-  JA224T: { label: "JA224T", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
+  JA224T: {
+    label: "JA224T",
+    mode: "JFOU / 鹿児島",
+    inherit: "DA42_NG",
+    inputDefaults: {
+      basicEmptyWeightLbs: 3147.1,
+      basicEmptyArm: 94.7,
+      noseBaggageLbs: 5 * KG_TO_LBS,
+      cabinBaggageLbs: 20 * KG_TO_LBS,
+      baggageExtensionLbs: 2 * KG_TO_LBS,
+      deiceL: 0,
+      taxiFuelGal: 1
+    }
+  },
   JA926T: { label: "JA926T", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
   JA999U: { label: "JA999U", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
   JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG_VI", inputDefaults: {} },
