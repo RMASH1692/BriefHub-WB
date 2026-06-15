@@ -262,7 +262,7 @@
     gap: 8px;
   }
 
-  .arm-pill {
+  .input-note {
     margin-top: 8px;
     display: inline-flex;
     align-items: center;
@@ -273,6 +273,11 @@
     color: #475569;
     font-size: 11px;
     font-weight: 700;
+  }
+
+  .limit-note {
+    background: #fff7ed;
+    color: #92400e;
   }
 
   .wb-table {
@@ -401,7 +406,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v4</span>
+  <span class="subtitle">Beta v5</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -551,25 +556,90 @@
 
     <div class="form-section-title">Crew / Passenger</div>
     <div class="input-grid">
-      <div class="field"><label>Front seat L</label><div class="field-pair"><input type="number" id="frontL_kg" step="0.1" placeholder="kg"><input type="number" id="frontL_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_frontL">-</span> in</span></div>
-      <div class="field"><label>Front seat R</label><div class="field-pair"><input type="number" id="frontR_kg" step="0.1" placeholder="kg"><input type="number" id="frontR_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_frontR">-</span> in</span></div>
-      <div class="field"><label>Rear seat L</label><div class="field-pair"><input type="number" id="rearL_kg" step="0.1" placeholder="kg"><input type="number" id="rearL_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_rearL">-</span> in</span></div>
-      <div class="field"><label>Rear seat R</label><div class="field-pair"><input type="number" id="rearR_kg" step="0.1" placeholder="kg"><input type="number" id="rearR_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_rearR">-</span> in</span></div>
+      <div class="field">
+        <label>Front seat L</label>
+        <div class="field-pair">
+          <input type="number" id="frontL_kg" step="0.1" placeholder="kg">
+          <input type="number" id="frontL_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="unit">kg / lbs</span>
+      </div>
+      <div class="field">
+        <label>Front seat R</label>
+        <div class="field-pair">
+          <input type="number" id="frontR_kg" step="0.1" placeholder="kg">
+          <input type="number" id="frontR_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="unit">kg / lbs</span>
+      </div>
+      <div class="field">
+        <label>Rear seat L</label>
+        <div class="field-pair">
+          <input type="number" id="rearL_kg" step="0.1" placeholder="kg">
+          <input type="number" id="rearL_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="unit">kg / lbs</span>
+      </div>
+      <div class="field">
+        <label>Rear seat R</label>
+        <div class="field-pair">
+          <input type="number" id="rearR_kg" step="0.1" placeholder="kg">
+          <input type="number" id="rearR_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="unit">kg / lbs</span>
+      </div>
     </div>
 
     <div class="form-section-title">Baggage / Fluid</div>
     <div class="input-grid">
-      <div class="field"><label>Nose baggage</label><div class="field-pair"><input type="number" id="nose_kg" step="0.1" placeholder="kg"><input type="number" id="nose_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_nose">-</span> in</span></div>
-      <div class="field"><label>Cabin baggage</label><div class="field-pair"><input type="number" id="cabin_kg" step="0.1" placeholder="kg"><input type="number" id="cabin_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_cabin">-</span> in</span></div>
-      <div class="field"><label>Baggage extension</label><div class="field-pair"><input type="number" id="extension_kg" step="0.1" placeholder="kg"><input type="number" id="extension_lbs" step="0.1" placeholder="lbs"></div><span class="arm-pill">Arm <span id="arm_extension">-</span> in</span></div>
-      <div class="field"><label>De-ice fluid</label><input type="number" id="deice_L" step="0.1" placeholder="L"><span class="arm-pill">Arm <span id="arm_deice">-</span> in</span></div>
+      <div class="field">
+        <label>Nose baggage</label>
+        <div class="field-pair">
+          <input type="number" id="nose_kg" step="0.1" placeholder="kg">
+          <input type="number" id="nose_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="input-note limit-note">Max 30 kg / 66 lbs</span>
+      </div>
+      <div class="field">
+        <label>Cabin baggage</label>
+        <div class="field-pair">
+          <input type="number" id="cabin_kg" step="0.1" placeholder="kg">
+          <input type="number" id="cabin_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="input-note limit-note">Max 45 kg / 100 lbs</span>
+      </div>
+      <div class="field">
+        <label>Baggage extension</label>
+        <div class="field-pair">
+          <input type="number" id="extension_kg" step="0.1" placeholder="kg">
+          <input type="number" id="extension_lbs" step="0.1" placeholder="lbs">
+        </div>
+        <span class="input-note limit-note">Max 18 kg / 40 lbs</span>
+      </div>
+      <div class="field">
+        <label>De-ice fluid</label>
+        <input type="number" id="deice_L" step="0.1" placeholder="L">
+        <span class="unit">L</span>
+      </div>
     </div>
 
     <div class="form-section-title">Fuel</div>
     <div class="input-grid">
-      <div class="field"><label>Main fuel</label><input type="number" id="mainFuel_gal" step="0.1" placeholder="US gal"><span class="arm-pill">Arm <span id="arm_fuel">-</span> in</span></div>
-      <div class="field"><label>Taxi fuel</label><input type="number" id="taxiFuel_gal" step="0.1" placeholder="US gal"><span class="arm-pill">Arm <span id="arm_taxiFuel">-</span> in</span></div>
-      <div class="field"><label>Trip fuel</label><input type="number" id="tripFuel_gal" step="0.1" placeholder="US gal"><span class="arm-pill">Arm <span id="arm_tripFuel">-</span> in</span></div>
+      <div class="field">
+        <label>Main fuel</label>
+        <input type="number" id="mainFuel_gal" step="0.1" placeholder="US gal">
+        <span class="unit">US gal</span>
+      </div>
+      <div class="field">
+        <label>Taxi fuel</label>
+        <input type="number" id="taxiFuel_gal" step="0.1" placeholder="US gal">
+        <span class="unit">US gal</span>
+      </div>
+      <div class="field">
+        <label>Trip fuel</label>
+        <input type="number" id="tripFuel_gal" step="0.1" placeholder="US gal">
+        <span class="unit">US gal</span>
+      </div>
     </div>
   </div>
 
@@ -767,6 +837,7 @@ const AIRCRAFT_PRESETS = {
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
+    inputDefaults: {},
     envelope: [],
     chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
   },
@@ -779,6 +850,7 @@ const AIRCRAFT_PRESETS = {
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
+    inputDefaults: {},
     envelope: [
       {x: 92.52, y: 3197}, {x: 92.52, y: 3236}, {x: 95.20, y: 4189},
       {x: 97.64, y: 4189}, {x: 97.64, y: 3748}, {x: 96.61, y: 3197}, {x: 92.52, y: 3197}
@@ -794,20 +866,21 @@ const AIRCRAFT_PRESETS = {
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: 9.2 / 3.785411784 },
     basicEmpty: { weightLbs: null, arm: null },
+    inputDefaults: {},
     envelope: [],
     chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
   },
 
-  JA52DA: { label: "JA52DA", mode: "JFOU / 福島", inherit: "DA42_TDI" },
-  JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_TDI" },
-  JA55DA: { label: "JA55DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
-  JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG_VI" },
-  JA224T: { label: "JA224T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
-  JA926T: { label: "JA926T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
-  JA999U: { label: "JA999U", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
-  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG_VI" },
-  JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_TDI" },
-  JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_TDI" }
+  JA52DA: { label: "JA52DA", mode: "JFOU / 福島", inherit: "DA42_TDI", inputDefaults: {} },
+  JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_TDI", inputDefaults: {} },
+  JA55DA: { label: "JA55DA", mode: "JFOU / 福島", inherit: "DA42_NG", inputDefaults: {} },
+  JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG_VI", inputDefaults: {} },
+  JA224T: { label: "JA224T", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
+  JA926T: { label: "JA926T", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
+  JA999U: { label: "JA999U", mode: "JFOU / 鹿児島", inherit: "DA42_NG", inputDefaults: {} },
+  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG_VI", inputDefaults: {} },
+  JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_TDI", inputDefaults: {} },
+  JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_TDI", inputDefaults: {} }
 };
 
 let currentPreset = null;
@@ -864,6 +937,7 @@ function resolvePreset(key) {
   resolved.fuel = mergeObject(base.fuel, preset.fuel);
   resolved.deice = mergeObject(base.deice, preset.deice);
   resolved.basicEmpty = mergeObject(base.basicEmpty, preset.basicEmpty);
+  resolved.inputDefaults = mergeObject(base.inputDefaults, preset.inputDefaults);
   resolved.envelope = preset.envelope || base.envelope;
   resolved.chart = preset.chart || base.chart;
 
@@ -900,6 +974,12 @@ function setInput(id, value, dec = 1) {
   const el = document.getElementById(id);
   if (!el) return;
   el.value = (value === null || value === undefined || Number.isNaN(value)) ? "" : Number(value).toFixed(dec);
+}
+
+function setWeightPairFromLbs(kgId, lbsId, lbsValue) {
+  if (lbsValue === null || lbsValue === undefined || Number.isNaN(lbsValue)) return;
+  setInput(lbsId, lbsValue, 1);
+  setInput(kgId, lbsToKg(lbsValue), 1);
 }
 
 function setText(id, value, dec = 1) {
@@ -990,28 +1070,34 @@ function applyPreset(p) {
 
   document.getElementById("summary_mtow").innerText = p.limits.mtowLbs ? `${fmt(p.limits.mtowLbs, 0)} lbs` : "-";
 
-  setInput("bew_lbs", p.basicEmpty.weightLbs, 1);
-  setInput("bew_kg", p.basicEmpty.weightLbs ? lbsToKg(p.basicEmpty.weightLbs) : null, 1);
-  setInput("bew_arm", p.basicEmpty.arm, 1);
+  const d = p.inputDefaults || {};
+  const bewLbs = d.basicEmptyWeightLbs !== undefined && d.basicEmptyWeightLbs !== null ? d.basicEmptyWeightLbs : p.basicEmpty.weightLbs;
+  const bewArm = d.basicEmptyArm !== undefined && d.basicEmptyArm !== null ? d.basicEmptyArm : p.basicEmpty.arm;
+
+  setInput("bew_lbs", bewLbs, 1);
+  setInput("bew_kg", bewLbs ? lbsToKg(bewLbs) : null, 1);
+  setInput("bew_arm", bewArm, 1);
 
   resetVariableInputs();
+  applyDefaultInputs(p);
   refreshArmBadges();
   initChart(p);
 }
 
+function applyDefaultInputs(p) {
+  const d = p.inputDefaults || {};
+
+  setWeightPairFromLbs("nose_kg", "nose_lbs", d.noseBaggageLbs);
+  setWeightPairFromLbs("cabin_kg", "cabin_lbs", d.cabinBaggageLbs);
+  setWeightPairFromLbs("extension_kg", "extension_lbs", d.baggageExtensionLbs);
+
+  setInput("deice_L", d.deiceL, 1);
+  setInput("taxiFuel_gal", d.taxiFuelGal, 1);
+}
+
 function refreshArmBadges() {
-  const a = currentPreset.arms;
-  document.getElementById("arm_frontL").innerText = fmt(a.frontSeat, 1);
-  document.getElementById("arm_frontR").innerText = fmt(a.frontSeat, 1);
-  document.getElementById("arm_rearL").innerText = fmt(a.rearSeat, 1);
-  document.getElementById("arm_rearR").innerText = fmt(a.rearSeat, 1);
-  document.getElementById("arm_nose").innerText = fmt(a.noseBaggage, 1);
-  document.getElementById("arm_cabin").innerText = fmt(a.cabinBaggage, 1);
-  document.getElementById("arm_extension").innerText = fmt(a.baggageExtension, 1);
-  document.getElementById("arm_deice").innerText = fmt(a.deice, 1);
-  document.getElementById("arm_fuel").innerText = fmt(a.fuel, 1);
-  document.getElementById("arm_taxiFuel").innerText = fmt(a.fuel, 1);
-  document.getElementById("arm_tripFuel").innerText = fmt(a.fuel, 1);
+  /* Weight Input側ではArmを表示しないため、ここでは何もしません。
+     Arm値はPresetとCalculation Resultで使用・表示します。 */
 }
 
 function resetVariableInputs() {
@@ -1165,7 +1251,7 @@ function calculateWB() {
   setText("result_ldg_moment", ldgM, 0);
 
   setStatus("result_zfw_status", !limits.mzfwLbs || zfwW <= limits.mzfwLbs, "Within Limits", "OVER ZFW");
-  document.getElementById("result_ramp_status").innerText = "-";
+  setStatus("result_ramp_status", !limits.mtowLbs || rampW <= limits.mtowLbs, "Within Limits", "OVER RAMP");
   setStatus("result_tow_status", !limits.mtowLbs || towW <= limits.mtowLbs, "Within Limits", "OVER TOW");
   setStatus("result_ldg_status", !limits.mlwLbs || ldgW <= limits.mlwLbs, "Within Limits", "OVER LDG");
 
@@ -1177,7 +1263,10 @@ function calculateWB() {
 }
 
 function initChart(p) {
-  const ctx = document.getElementById("wbChart").getContext("2d");
+  if (typeof Chart === "undefined") return;
+  const canvas = document.getElementById("wbChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
   if (wbChart) wbChart.destroy();
 
   const datasets = [
