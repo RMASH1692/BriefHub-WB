@@ -431,7 +431,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v12</span>
+  <span class="subtitle">Beta v13</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -678,7 +678,9 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: true,
     armsIn: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
+    armsM: { frontSeat: 2.30, rearSeat: 2.35, noseBaggage: 0.60, cabinBaggage: 3.89, baggageExtension: 4.54, fuel: 2.63, deice: 1.00 },
     limitsLbs: { mtow: 3935, mlw: 3748, mzfw: 3638 },
+    limitsKg: { mtow: 1785, mlw: 1700, mzfw: 1650 },
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
@@ -693,7 +695,9 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: true,
     armsIn: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
+    armsM: { frontSeat: 2.30, rearSeat: 2.35, noseBaggage: 0.60, cabinBaggage: 3.89, baggageExtension: 4.54, fuel: 2.63, deice: 1.00 },
     limitsLbs: { mtow: 4189, mlw: 3979, mzfw: 3891 },
+    limitsKg: { mtow: 1900, mlw: 1805, mzfw: 1765 },
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
@@ -711,7 +715,9 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: true,
     armsIn: { frontSeat: 90.6, rearSeat: 128.0, noseBaggage: 23.6, cabinBaggage: 153.1, baggageExtension: 178.7, fuel: 103.5, deice: 39.4 },
+    armsM: { frontSeat: 2.30, rearSeat: 2.35, noseBaggage: 0.60, cabinBaggage: 3.89, baggageExtension: 4.54, fuel: 2.63, deice: 1.00 },
     limitsLbs: { mtow: 4189, mlw: 3979, mzfw: 3891 },
+    limitsKg: { mtow: 1900, mlw: 1805, mzfw: 1765 },
     fuel: { lbsPerGal: 7.01 },
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
@@ -893,17 +899,17 @@ function emptyInputState() {
   return {
     bewLbs: null,
     bewArmIn: null,
-    frontLLbs: null,
-    frontRLbs: null,
-    rearLLbs: null,
-    rearRLbs: null,
-    noseLbs: null,
-    cabinLbs: null,
-    extensionLbs: null,
-    deiceL: null,
-    mainFuelGal: null,
-    taxiFuelGal: null,
-    tripFuelGal: null
+    frontLLbs: 0,
+    frontRLbs: 0,
+    rearLLbs: 0,
+    rearRLbs: 0,
+    noseLbs: 0,
+    cabinLbs: 0,
+    extensionLbs: 0,
+    deiceL: 0,
+    mainFuelGal: 0,
+    taxiFuelGal: 0,
+    tripFuelGal: 0
   };
 }
 
@@ -1004,17 +1010,17 @@ function buildInitialInputState(p) {
   return {
     bewLbs: firstNumber(d.basicEmptyWeightLbs, d.basicEmptyWeightKg !== undefined && d.basicEmptyWeightKg !== null ? kgToLbs(d.basicEmptyWeightKg) : p.basicEmpty.weightLbs),
     bewArmIn: firstNumber(d.basicEmptyArmIn, d.basicEmptyArmM !== undefined && d.basicEmptyArmM !== null ? mToIn(d.basicEmptyArmM) : p.basicEmpty.armIn),
-    frontLLbs: null,
-    frontRLbs: null,
-    rearLLbs: null,
-    rearRLbs: null,
-    noseLbs: firstNumber(d.noseBaggageLbs, d.noseBaggageKg !== undefined && d.noseBaggageKg !== null ? kgToLbs(d.noseBaggageKg) : null),
-    cabinLbs: firstNumber(d.cabinBaggageLbs, d.cabinBaggageKg !== undefined && d.cabinBaggageKg !== null ? kgToLbs(d.cabinBaggageKg) : null),
-    extensionLbs: firstNumber(d.baggageExtensionLbs, d.baggageExtensionKg !== undefined && d.baggageExtensionKg !== null ? kgToLbs(d.baggageExtensionKg) : null),
-    deiceL: firstNumber(d.deiceL, d.deiceGal !== undefined && d.deiceGal !== null ? deiceGalToLiters(d.deiceGal) : null),
-    mainFuelGal: firstNumber(d.mainFuelGal, null),
-    taxiFuelGal: firstNumber(d.taxiFuelGal, null),
-    tripFuelGal: firstNumber(d.tripFuelGal, null)
+    frontLLbs: 0,
+    frontRLbs: 0,
+    rearLLbs: 0,
+    rearRLbs: 0,
+    noseLbs: firstNumber(d.noseBaggageLbs, d.noseBaggageKg !== undefined && d.noseBaggageKg !== null ? kgToLbs(d.noseBaggageKg) : 0),
+    cabinLbs: firstNumber(d.cabinBaggageLbs, d.cabinBaggageKg !== undefined && d.cabinBaggageKg !== null ? kgToLbs(d.cabinBaggageKg) : 0),
+    extensionLbs: firstNumber(d.baggageExtensionLbs, d.baggageExtensionKg !== undefined && d.baggageExtensionKg !== null ? kgToLbs(d.baggageExtensionKg) : 0),
+    deiceL: firstNumber(d.deiceL, d.deiceGal !== undefined && d.deiceGal !== null ? deiceGalToLiters(d.deiceGal) : 0),
+    mainFuelGal: firstNumber(d.mainFuelGal, 0),
+    taxiFuelGal: firstNumber(d.taxiFuelGal, 0),
+    tripFuelGal: firstNumber(d.tripFuelGal, 0)
   };
 }
 
@@ -1024,6 +1030,50 @@ function firstNumber() {
     if (v !== null && v !== undefined && !Number.isNaN(v)) return v;
   }
   return null;
+}
+
+function hasNumber(value) {
+  return value !== null && value !== undefined && !Number.isNaN(value);
+}
+
+function getArmDisplayValue(key) {
+  if (currentUnit === "metric" && currentPreset.armsM && hasNumber(currentPreset.armsM[key])) {
+    return currentPreset.armsM[key];
+  }
+  return displayArm(currentPreset.armsIn[key]);
+}
+
+function getLimitDisplayValue(key) {
+  if (currentUnit === "metric" && currentPreset.limitsKg && hasNumber(currentPreset.limitsKg[key])) {
+    return currentPreset.limitsKg[key];
+  }
+  return displayWeight(currentPreset.limitsLbs[key]);
+}
+
+function getActiveArmsIn() {
+  const source = currentPreset.armsIn || {};
+  if (currentUnit !== "metric" || !currentPreset.armsM) return source;
+
+  return {
+    frontSeat: hasNumber(currentPreset.armsM.frontSeat) ? mToIn(currentPreset.armsM.frontSeat) : source.frontSeat,
+    rearSeat: hasNumber(currentPreset.armsM.rearSeat) ? mToIn(currentPreset.armsM.rearSeat) : source.rearSeat,
+    noseBaggage: hasNumber(currentPreset.armsM.noseBaggage) ? mToIn(currentPreset.armsM.noseBaggage) : source.noseBaggage,
+    cabinBaggage: hasNumber(currentPreset.armsM.cabinBaggage) ? mToIn(currentPreset.armsM.cabinBaggage) : source.cabinBaggage,
+    baggageExtension: hasNumber(currentPreset.armsM.baggageExtension) ? mToIn(currentPreset.armsM.baggageExtension) : source.baggageExtension,
+    fuel: hasNumber(currentPreset.armsM.fuel) ? mToIn(currentPreset.armsM.fuel) : source.fuel,
+    deice: hasNumber(currentPreset.armsM.deice) ? mToIn(currentPreset.armsM.deice) : source.deice
+  };
+}
+
+function getActiveLimitsLbs() {
+  const source = currentPreset.limitsLbs || {};
+  if (currentUnit !== "metric" || !currentPreset.limitsKg) return source;
+
+  return {
+    mtow: hasNumber(currentPreset.limitsKg.mtow) ? kgToLbs(currentPreset.limitsKg.mtow) : source.mtow,
+    mlw: hasNumber(currentPreset.limitsKg.mlw) ? kgToLbs(currentPreset.limitsKg.mlw) : source.mlw,
+    mzfw: hasNumber(currentPreset.limitsKg.mzfw) ? kgToLbs(currentPreset.limitsKg.mzfw) : source.mzfw
+  };
 }
 
 function fmt(value, dec = 1) {
@@ -1037,34 +1087,13 @@ function inToM(inches) { return inches * IN_TO_M; }
 function mToIn(meters) { return meters * M_TO_IN; }
 function momentToKgM(inLbs) { return lbsToKg(inLbs) * IN_TO_M; }
 
-function displayWeight(lbs) {
-  if (lbs === null || lbs === undefined || Number.isNaN(lbs)) return null;
-  return currentUnit === "metric" ? lbsToKg(lbs) : lbs;
-}
-function inputWeightToLbs(value) {
-  if (value === null || value === undefined || Number.isNaN(value)) return null;
-  return currentUnit === "metric" ? kgToLbs(value) : value;
-}
-function displayArm(inches) {
-  if (inches === null || inches === undefined || Number.isNaN(inches)) return null;
-  return currentUnit === "metric" ? inToM(inches) : inches;
-}
-function inputArmToIn(value) {
-  if (value === null || value === undefined || Number.isNaN(value)) return null;
-  return currentUnit === "metric" ? mToIn(value) : value;
-}
-function displayMoment(inLbs) {
-  if (inLbs === null || inLbs === undefined || Number.isNaN(inLbs)) return null;
-  return currentUnit === "metric" ? momentToKgM(inLbs) : inLbs;
-}
-function displayDeiceVolume(liters) {
-  if (liters === null || liters === undefined || Number.isNaN(liters)) return null;
-  return currentUnit === "metric" ? liters : deiceLitersToGal(liters);
-}
-function inputDeiceToLiters(value) {
-  if (value === null || value === undefined || Number.isNaN(value)) return null;
-  return currentUnit === "metric" ? value : deiceGalToLiters(value);
-}
+function displayWeight(lbs) { return currentUnit === "metric" ? lbsToKg(lbs) : lbs; }
+function inputWeightToLbs(value) { return currentUnit === "metric" ? kgToLbs(value) : value; }
+function displayArm(inches) { return currentUnit === "metric" ? inToM(inches) : inches; }
+function inputArmToIn(value) { return currentUnit === "metric" ? mToIn(value) : value; }
+function displayMoment(inLbs) { return currentUnit === "metric" ? momentToKgM(inLbs) : inLbs; }
+function displayDeiceVolume(liters) { return currentUnit === "metric" ? liters : deiceLitersToGal(liters); }
+function inputDeiceToLiters(value) { return currentUnit === "metric" ? value : deiceGalToLiters(value); }
 function deiceLitersToGal(liters) { return (liters * DEICE_KG_PER_L * KG_TO_LBS) / DEICE_LBS_PER_GAL; }
 function deiceGalToLiters(gallons) { return (gallons * DEICE_LBS_PER_GAL * LBS_TO_KG) / DEICE_KG_PER_L; }
 
@@ -1162,37 +1191,54 @@ function setInputStep(id, step) {
 
 function applyPresetToForm() {
   const unit = getUnit();
-  const a = currentPreset.armsIn;
-  const l = currentPreset.limitsLbs;
+  const activeLimits = getActiveLimitsLbs();
 
-  setInput("preset_frontSeat", displayArm(a.frontSeat), unit.armDec);
-  setInput("preset_rearSeat", displayArm(a.rearSeat), unit.armDec);
-  setInput("preset_noseBaggage", displayArm(a.noseBaggage), unit.armDec);
-  setInput("preset_cabinBaggage", displayArm(a.cabinBaggage), unit.armDec);
-  setInput("preset_baggageExtension", displayArm(a.baggageExtension), unit.armDec);
-  setInput("preset_fuel", displayArm(a.fuel), unit.armDec);
-  setInput("preset_deice", displayArm(a.deice), unit.armDec);
+  setInput("preset_frontSeat", getArmDisplayValue("frontSeat"), unit.armDec);
+  setInput("preset_rearSeat", getArmDisplayValue("rearSeat"), unit.armDec);
+  setInput("preset_noseBaggage", getArmDisplayValue("noseBaggage"), unit.armDec);
+  setInput("preset_cabinBaggage", getArmDisplayValue("cabinBaggage"), unit.armDec);
+  setInput("preset_baggageExtension", getArmDisplayValue("baggageExtension"), unit.armDec);
+  setInput("preset_fuel", getArmDisplayValue("fuel"), unit.armDec);
+  setInput("preset_deice", getArmDisplayValue("deice"), unit.armDec);
 
-  setInput("preset_mtow", displayWeight(l.mtow), unit.weightDec);
-  setInput("preset_mlw", displayWeight(l.mlw), unit.weightDec);
-  setInput("preset_mzfw", displayWeight(l.mzfw), unit.weightDec);
+  setInput("preset_mtow", getLimitDisplayValue("mtow"), unit.weightDec);
+  setInput("preset_mlw", getLimitDisplayValue("mlw"), unit.weightDec);
+  setInput("preset_mzfw", getLimitDisplayValue("mzfw"), unit.weightDec);
 
-  document.getElementById("summary_mtow").innerText = l.mtow ? `${fmt(displayWeight(l.mtow), unit.weightDec)} ${unit.weight}` : "-";
+  document.getElementById("summary_mtow").innerText = activeLimits.mtow ? `${fmt(displayWeight(activeLimits.mtow), unit.weightDec)} ${unit.weight}` : "-";
 }
 
 function syncPresetFromForm() {
   if (!currentPreset) return;
-  currentPreset.armsIn.frontSeat = inputArmToIn(getNumber("preset_frontSeat"));
-  currentPreset.armsIn.rearSeat = inputArmToIn(getNumber("preset_rearSeat"));
-  currentPreset.armsIn.noseBaggage = inputArmToIn(getNumber("preset_noseBaggage"));
-  currentPreset.armsIn.cabinBaggage = inputArmToIn(getNumber("preset_cabinBaggage"));
-  currentPreset.armsIn.baggageExtension = inputArmToIn(getNumber("preset_baggageExtension"));
-  currentPreset.armsIn.fuel = inputArmToIn(getNumber("preset_fuel"));
-  currentPreset.armsIn.deice = inputArmToIn(getNumber("preset_deice"));
 
-  currentPreset.limitsLbs.mtow = inputWeightToLbs(getNullableNumber("preset_mtow"));
-  currentPreset.limitsLbs.mlw = inputWeightToLbs(getNullableNumber("preset_mlw"));
-  currentPreset.limitsLbs.mzfw = inputWeightToLbs(getNullableNumber("preset_mzfw"));
+  if (currentUnit === "metric") {
+    currentPreset.armsM = currentPreset.armsM || {};
+    currentPreset.limitsKg = currentPreset.limitsKg || {};
+
+    currentPreset.armsM.frontSeat = getNullableNumber("preset_frontSeat");
+    currentPreset.armsM.rearSeat = getNullableNumber("preset_rearSeat");
+    currentPreset.armsM.noseBaggage = getNullableNumber("preset_noseBaggage");
+    currentPreset.armsM.cabinBaggage = getNullableNumber("preset_cabinBaggage");
+    currentPreset.armsM.baggageExtension = getNullableNumber("preset_baggageExtension");
+    currentPreset.armsM.fuel = getNullableNumber("preset_fuel");
+    currentPreset.armsM.deice = getNullableNumber("preset_deice");
+
+    currentPreset.limitsKg.mtow = getNullableNumber("preset_mtow");
+    currentPreset.limitsKg.mlw = getNullableNumber("preset_mlw");
+    currentPreset.limitsKg.mzfw = getNullableNumber("preset_mzfw");
+  } else {
+    currentPreset.armsIn.frontSeat = getNullableNumber("preset_frontSeat");
+    currentPreset.armsIn.rearSeat = getNullableNumber("preset_rearSeat");
+    currentPreset.armsIn.noseBaggage = getNullableNumber("preset_noseBaggage");
+    currentPreset.armsIn.cabinBaggage = getNullableNumber("preset_cabinBaggage");
+    currentPreset.armsIn.baggageExtension = getNullableNumber("preset_baggageExtension");
+    currentPreset.armsIn.fuel = getNullableNumber("preset_fuel");
+    currentPreset.armsIn.deice = getNullableNumber("preset_deice");
+
+    currentPreset.limitsLbs.mtow = getNullableNumber("preset_mtow");
+    currentPreset.limitsLbs.mlw = getNullableNumber("preset_mlw");
+    currentPreset.limitsLbs.mzfw = getNullableNumber("preset_mzfw");
+  }
 }
 
 function writeInputStateToForm() {
@@ -1215,17 +1261,17 @@ function writeInputStateToForm() {
 function syncInputStateFromForm() {
   inputState.bewLbs = inputWeightToLbs(getNullableNumber("bew"));
   inputState.bewArmIn = inputArmToIn(getNullableNumber("bew_arm"));
-  inputState.frontLLbs = inputWeightToLbs(getNullableNumber("frontL"));
-  inputState.frontRLbs = inputWeightToLbs(getNullableNumber("frontR"));
-  inputState.rearLLbs = inputWeightToLbs(getNullableNumber("rearL"));
-  inputState.rearRLbs = inputWeightToLbs(getNullableNumber("rearR"));
-  inputState.noseLbs = inputWeightToLbs(getNullableNumber("nose"));
-  inputState.cabinLbs = inputWeightToLbs(getNullableNumber("cabin"));
-  inputState.extensionLbs = inputWeightToLbs(getNullableNumber("extension"));
-  inputState.deiceL = inputDeiceToLiters(getNullableNumber("deice"));
-  inputState.mainFuelGal = getNullableNumber("mainFuel_gal");
-  inputState.taxiFuelGal = getNullableNumber("taxiFuel_gal");
-  inputState.tripFuelGal = getNullableNumber("tripFuel_gal");
+  inputState.frontLLbs = inputWeightToLbs(getNumber("frontL"));
+  inputState.frontRLbs = inputWeightToLbs(getNumber("frontR"));
+  inputState.rearLLbs = inputWeightToLbs(getNumber("rearL"));
+  inputState.rearRLbs = inputWeightToLbs(getNumber("rearR"));
+  inputState.noseLbs = inputWeightToLbs(getNumber("nose"));
+  inputState.cabinLbs = inputWeightToLbs(getNumber("cabin"));
+  inputState.extensionLbs = inputWeightToLbs(getNumber("extension"));
+  inputState.deiceL = inputDeiceToLiters(getNumber("deice"));
+  inputState.mainFuelGal = getNumber("mainFuel_gal");
+  inputState.taxiFuelGal = getNumber("taxiFuel_gal");
+  inputState.tripFuelGal = getNumber("tripFuel_gal");
 }
 
 function bindInputs() {
@@ -1268,8 +1314,8 @@ function calculateWB() {
   syncInputStateFromForm();
 
   const unit = getUnit();
-  const a = currentPreset.armsIn;
-  const limits = currentPreset.limitsLbs;
+  const a = getActiveArmsIn();
+  const limits = getActiveLimitsLbs();
   const fuelLbsPerGal = currentPreset.fuel.lbsPerGal || 0;
   const deiceLbsPerL = currentPreset.deice.lbsPerL || 0;
 
@@ -1364,14 +1410,15 @@ function initChart(p) {
   if (wbChart) wbChart.destroy();
 
   const chartBounds = p.chart || { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 };
+  const activeLimits = getActiveLimitsLbs();
   const envelopeData = (p.envelope || []).map(point => ({ x: chartX(point.x), y: chartY(point.y) }));
   const datasets = [
     { label: "Envelope", data: envelopeData, showLine: true, borderColor: "#334155", borderWidth: 4, pointRadius: 0, fill: false, tension: 0 },
     { label: "Flight States", data: [], backgroundColor: ["orange", "purple", "green", "blue"], borderColor: "black", borderWidth: 1, pointRadius: 6 }
   ];
 
-  if (p.limitsLbs.mzfw) datasets.push({ label: "Max Zero Fuel", data: [{x: chartX(chartBounds.xMin), y: chartY(p.limitsLbs.mzfw)}, {x: chartX(chartBounds.xMax), y: chartY(p.limitsLbs.mzfw)}], showLine: true, borderColor: "#d32f2f", borderDash: [8, 5], pointRadius: 0, borderWidth: 2 });
-  if (p.limitsLbs.mlw) datasets.push({ label: "Max Landing", data: [{x: chartX(chartBounds.xMin), y: chartY(p.limitsLbs.mlw)}, {x: chartX(chartBounds.xMax), y: chartY(p.limitsLbs.mlw)}], showLine: true, borderColor: "#0078D4", borderDash: [2, 4], pointRadius: 0, borderWidth: 2 });
+  if (activeLimits.mzfw) datasets.push({ label: "Max Zero Fuel", data: [{x: chartX(chartBounds.xMin), y: chartY(activeLimits.mzfw)}, {x: chartX(chartBounds.xMax), y: chartY(activeLimits.mzfw)}], showLine: true, borderColor: "#d32f2f", borderDash: [8, 5], pointRadius: 0, borderWidth: 2 });
+  if (activeLimits.mlw) datasets.push({ label: "Max Landing", data: [{x: chartX(chartBounds.xMin), y: chartY(activeLimits.mlw)}, {x: chartX(chartBounds.xMax), y: chartY(activeLimits.mlw)}], showLine: true, borderColor: "#0078D4", borderDash: [2, 4], pointRadius: 0, borderWidth: 2 });
 
   const unit = getUnit();
   wbChart = new Chart(ctx, {
