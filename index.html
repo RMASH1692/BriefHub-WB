@@ -431,7 +431,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v14</span>
+  <span class="subtitle">Beta v15</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -732,6 +732,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
+    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1353,
       basicEmptyArmM: 2.420,
@@ -748,6 +750,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
+    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1364,
       basicEmptyArmM: 2.470,
@@ -764,6 +768,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
+    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1461.7,
       basicEmptyArmM: 2.389,
@@ -780,6 +786,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_NG_VI",
+    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsKg: { mtow: 1999, mlw: 1999, mzfw: 1835 },
     inputDefaults: {
       basicEmptyWeightKg: 1531,
       basicEmptyArmM: 2.445,
@@ -796,6 +804,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3147.1,
       basicEmptyArmIn: 94.7,
@@ -812,6 +822,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3276.7,
       basicEmptyArmIn: 95.3,
@@ -828,6 +840,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3214.4,
       basicEmptyArmIn: 95.0,
@@ -844,6 +858,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG_VI",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: { mtow: 4407, mlw: 4407, mzfw: 4045 },
     inputDefaults: {
       basicEmptyWeightLbs: 3406.1,
       basicEmptyArmIn: 95.8,
@@ -860,6 +876,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 2984.5,
       basicEmptyArmIn: 94.81,
@@ -876,6 +894,8 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
+    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
+    limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 2974.4,
       basicEmptyArmIn: 94.81,
@@ -963,6 +983,7 @@ function resolvePreset(key) {
     : cloneObject(preset);
 
   normalizePreset(resolved);
+  applyIndividualLimitOverride(resolved, preset);
   return resolved;
 }
 
@@ -970,16 +991,20 @@ function normalizePreset(p) {
   p.armsIn = p.armsIn || {};
   if (p.armsM) {
     Object.keys(p.armsM).forEach(key => {
-      if (p.armsIn[key] === undefined || p.armsIn[key] === null) p.armsIn[key] = mToIn(p.armsM[key]);
+      if ((p.armsIn[key] === undefined || p.armsIn[key] === null) && hasNumber(p.armsM[key])) p.armsIn[key] = mToIn(p.armsM[key]);
     });
   }
 
   p.limitsLbs = p.limitsLbs || {};
-  if (p.limitsKg) {
-    Object.keys(p.limitsKg).forEach(key => {
-      if (p.limitsLbs[key] === undefined || p.limitsLbs[key] === null) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
-    });
-  }
+  p.limitsKg = p.limitsKg || {};
+
+  // limitsKg / limitsLbs のどちらか一方だけを入力しても、内部計算用にもう一方を補完します。
+  Object.keys(p.limitsKg).forEach(key => {
+    if ((p.limitsLbs[key] === undefined || p.limitsLbs[key] === null) && hasNumber(p.limitsKg[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
+  });
+  Object.keys(p.limitsLbs).forEach(key => {
+    if ((p.limitsKg[key] === undefined || p.limitsKg[key] === null) && hasNumber(p.limitsLbs[key])) p.limitsKg[key] = lbsToKg(p.limitsLbs[key]);
+  });
 
   p.basicEmpty = p.basicEmpty || { weightLbs: null, armIn: null };
   if (p.basicEmpty.weightKg !== undefined && p.basicEmpty.weightKg !== null && (p.basicEmpty.weightLbs === undefined || p.basicEmpty.weightLbs === null)) {
@@ -987,6 +1012,45 @@ function normalizePreset(p) {
   }
   if (p.basicEmpty.armM !== undefined && p.basicEmpty.armM !== null && (p.basicEmpty.armIn === undefined || p.basicEmpty.armIn === null)) {
     p.basicEmpty.armIn = mToIn(p.basicEmpty.armM);
+  }
+}
+
+function hasOwnLimitObject(preset, key) {
+  return Object.prototype.hasOwnProperty.call(preset, key)
+    && preset[key]
+    && typeof preset[key] === "object"
+    && !Array.isArray(preset[key])
+    && Object.keys(preset[key]).length > 0;
+}
+
+function syncLimitPairFromKg(p) {
+  p.limitsKg = p.limitsKg || {};
+  p.limitsLbs = p.limitsLbs || {};
+  ["mtow", "mlw", "mzfw"].forEach(key => {
+    if (hasNumber(p.limitsKg[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
+  });
+}
+
+function syncLimitPairFromLbs(p) {
+  p.limitsLbs = p.limitsLbs || {};
+  p.limitsKg = p.limitsKg || {};
+  ["mtow", "mlw", "mzfw"].forEach(key => {
+    if (hasNumber(p.limitsLbs[key])) p.limitsKg[key] = lbsToKg(p.limitsLbs[key]);
+  });
+}
+
+function applyIndividualLimitOverride(resolved, originalPreset) {
+  if (!originalPreset || !originalPreset.inherit) return;
+
+  // JA機体側で limitsKg を指定した場合は、継承元のlbs制限値よりkg側を優先します。
+  if (hasOwnLimitObject(originalPreset, "limitsKg")) {
+    syncLimitPairFromKg(resolved);
+    return;
+  }
+
+  // JA機体側で limitsLbs を指定した場合は、継承元のkg制限値よりlbs側を優先します。
+  if (hasOwnLimitObject(originalPreset, "limitsLbs")) {
+    syncLimitPairFromLbs(resolved);
   }
 }
 
@@ -1226,6 +1290,7 @@ function syncPresetFromForm() {
     currentPreset.limitsKg.mtow = getNullableNumber("preset_mtow");
     currentPreset.limitsKg.mlw = getNullableNumber("preset_mlw");
     currentPreset.limitsKg.mzfw = getNullableNumber("preset_mzfw");
+    syncLimitPairFromKg(currentPreset);
   } else {
     currentPreset.armsIn.frontSeat = getNullableNumber("preset_frontSeat");
     currentPreset.armsIn.rearSeat = getNullableNumber("preset_rearSeat");
@@ -1238,6 +1303,7 @@ function syncPresetFromForm() {
     currentPreset.limitsLbs.mtow = getNullableNumber("preset_mtow");
     currentPreset.limitsLbs.mlw = getNullableNumber("preset_mlw");
     currentPreset.limitsLbs.mzfw = getNullableNumber("preset_mzfw");
+    syncLimitPairFromLbs(currentPreset);
   }
 }
 
