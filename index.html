@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DA42NG Weight & Balance Calculator</title>
+<title>DA42 Weight & Balance Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
@@ -12,393 +12,1176 @@
     --input-bg: #fff9c4;
     --alert-color: #d32f2f;
     --safe-color: #28a745;
+    --border-color: #ddd;
+    --bg-light: #f7f9fc;
   }
 
-  /* -------------------------------------
-     ベーススタイル（参考デザインに準拠）
-  ------------------------------------- */
-  body { 
-    font-family: Arial, sans-serif; 
-    color: #333; 
-    max-width: 900px; 
-    margin: 0 auto; 
-    padding: 20px; 
-    background-color: #fff; 
+  body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
   }
 
-  h2.main-title { 
-    text-align: center; 
-    font-weight: normal; 
-    border-bottom: 2px solid #0078D4; 
-    padding-bottom: 15px; 
-    margin-bottom: 20px; 
-    letter-spacing: 1px; 
-    color: #0078D4; 
+  h2.main-title {
+    text-align: center;
+    font-weight: normal;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    color: var(--primary-color);
   }
-  
+
   .subtitle {
     font-size: 14px;
     color: #777;
     margin-left: 10px;
   }
 
-  /* カードレイアウト（参考デザインに準拠） */
-  .card { 
-    border-left: 4px solid #0078D4; 
-    border-top: 1px solid #eee; 
-    border-right: 1px solid #eee; 
-    border-bottom: 1px solid #eee; 
-    padding: 20px; 
-    margin-bottom: 25px; 
-    border-radius: 0 4px 4px 0; 
-    background-color: #fff;
-  }
-  .card h3 { 
-    display: flex; 
-    justify-content: center;
-    align-items: center; 
-    margin: 0 0 15px 0; 
-    font-size: 20px; 
-    color: #0078D4; 
-    border-bottom: 1px dashed #eee; 
-    padding-bottom: 10px; 
+  .hidden {
+    display: none !important;
   }
 
-  /* -------------------------------------
-     テーブル部分（指定通り色は絶対に変更しない）
-  ------------------------------------- */
+  .card {
+    border-left: 4px solid var(--primary-color);
+    border-top: 1px solid #eee;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 0 4px 4px 0;
+    background-color: #fff;
+  }
+
+  .card h3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    color: var(--primary-color);
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 10px;
+  }
+
+  .select-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .select-button {
+    border: 1px solid #d8e6f3;
+    background: #fff;
+    border-left: 5px solid var(--primary-color);
+    padding: 22px;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+
+  .select-button:hover {
+    background: #f0f7ff;
+    transform: translateY(-1px);
+  }
+
+  .select-button .main {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .select-button .sub {
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .back-button,
+  .primary-button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .back-button {
+    background: #f1f1f1;
+    color: #333;
+  }
+
+  .primary-button {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  .password-box {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .password-box input {
+    padding: 10px;
+    font-size: 16px;
+    min-width: 240px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+  }
+
+  .error-text {
+    color: var(--alert-color);
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .base-label {
+    font-size: 14px;
+    color: #666;
+    margin: 16px 0 8px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+  }
+
+  details.preset-card {
+    border-left: 4px solid #666;
+  }
+
+  details summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 18px;
+  }
+
   .wb-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
   }
-  .wb-table th, .wb-table td {
-    border: 1px solid #ddd;
-    padding: 10px 12px;
+
+  .wb-table th,
+  .wb-table td {
+    border: 1px solid var(--border-color);
+    padding: 9px 10px;
     text-align: right;
   }
-  .wb-table th { background: #f0f0f0; font-weight: bold; text-align: center; color: #333; }
-  .wb-table th.left-align { text-align: left; }
-  
-  /* 入力・計算セルの配色 */
-  .input-cell { background-color: var(--input-bg); width: 100px; padding: 0; }
-  .input-cell input::-webkit-outer-spin-button,
-  .input-cell input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .input-cell input[type=number] {
-    -moz-appearance: textfield;
-    width: 100%; height: 100%; border: none; background: transparent;
-    text-align: right; font-size: 15px; font-weight: bold; padding: 10px 12px;
-    box-sizing: border-box; outline: none;
-  }
-  .calc-cell { background-color: #ffffff; font-weight: bold; }
-  .fixed-cell { background-color: #fafafa; color: #666; }
-  .section-row td { background-color: #f5f5f5; font-weight: bold; border-top: 2px solid #aaa; }
-  .left-text { text-align: left !important; }
 
-  /* -------------------------------------
-     計算結果部分
-  ------------------------------------- */
-  .result-summary {
-    display: flex;
-    gap: 15px;
-    justify-content: space-between;
-    margin-top: 30px;
-    flex-wrap: wrap;
-  }
-  .result-summary .card {
-    flex: 1;
-    min-width: 200px;
+  .wb-table th {
+    background: #f0f0f0;
+    font-weight: bold;
     text-align: center;
-    padding: 15px;
-    margin-bottom: 0;
-  }
-  .result-summary .card .value { 
-    font-size: 28px; 
-    font-weight: bold; 
-    display: block; 
-    margin-bottom: 5px;
     color: #333;
   }
-  .status-ok { color: var(--safe-color); font-weight: bold; font-size: 14px; }
-  .status-alert { color: var(--alert-color); font-weight: bold; font-size: 14px; }
 
-  /* -------------------------------------
-     チャート部分
-  ------------------------------------- */
+  .left-text {
+    text-align: left !important;
+  }
+
+  .input-cell {
+    background-color: var(--input-bg);
+    padding: 0 !important;
+  }
+
+  .input-cell input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: right;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 9px 10px;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .fixed-cell {
+    background-color: #fafafa;
+    color: #666;
+    font-weight: bold;
+  }
+
+  .calc-cell {
+    background-color: #fff;
+    font-weight: bold;
+  }
+
+  .section-row td {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    border-top: 2px solid #aaa;
+  }
+
+  .result-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .result-summary .mini-card {
+    border: 1px solid #eee;
+    border-left: 4px solid var(--primary-color);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .result-summary .value {
+    display: block;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 6px;
+  }
+
+  .status-ok {
+    color: var(--safe-color);
+    font-weight: bold;
+  }
+
+  .status-alert {
+    color: var(--alert-color);
+    font-weight: bold;
+  }
+
   .chart-wrapper {
     position: relative;
     width: 100%;
-    max-width: 800px;
+    max-width: 820px;
     margin: 0 auto;
     border: 3px solid #333;
     background: white;
-    padding: 0;
   }
+
   .chart-container {
     position: relative;
     width: 100%;
-    padding-bottom: 68%; 
+    padding-bottom: 68%;
     height: 0;
   }
+
   #wbChart {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
   }
 
-  .chart-legend-overlay {
-    position: absolute;
-    top: 15px;
-    left: 60px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 5px;
-    pointer-events: none;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    z-index: 10;
-    border: 1px solid #ddd;
+  @media (max-width: 700px) {
+    .select-grid,
+    .result-summary {
+      grid-template-columns: 1fr;
+    }
+
+    body {
+      padding: 14px;
+    }
+
+    .wb-table {
+      font-size: 12px;
+    }
+
+    .wb-table th,
+    .wb-table td {
+      padding: 7px;
+    }
   }
-  .legend-item { display: flex; align-items: center; margin-bottom: 4px; color: #333; }
-  .legend-line { width: 30px; height: 0; margin-right: 8px; border-top-width: 3px; }
-  .l-env { border-top-style: solid; border-top-color: #444; border-top-width: 5px; }
-  .l-zfw { border-top-style: dashed; border-top-color: red; border-top-width: 2px; }
-  .l-ldg { border-top-style: dotted; border-top-color: #0078D4; border-top-width: 3px; }
 </style>
 </head>
+
 <body>
 
-  <h2 class="main-title">
-    DA42NG Weight & Balance Calculator <span class="subtitle">Ver2 Test run</span>
-  </h2>
+<h2 class="main-title">
+  DA42 Weight & Balance Calculator
+  <span class="subtitle">Multi Aircraft Base Format</span>
+</h2>
 
-  <form id="wbForm">
+<!-- =========================
+     ① 最初の機種選択画面
+========================= -->
+<section id="modelSelectScreen">
+  <div class="card">
+    <h3>Select Aircraft Type</h3>
+
+    <div class="select-grid">
+      <button class="select-button" onclick="selectPublicAircraft('DA42_TDI')">
+        <div class="main">DA42 TDI</div>
+        <div class="sub">通常W&Bへ進みます</div>
+      </button>
+
+      <button class="select-button" onclick="selectPublicAircraft('DA42_NG')">
+        <div class="main">DA42 NG</div>
+        <div class="sub">通常W&Bへ進みます</div>
+      </button>
+
+      <button class="select-button" onclick="selectPublicAircraft('DA42_NG_VI')">
+        <div class="main">DA42 NG-Ⅵ</div>
+        <div class="sub">通常W&Bへ進みます</div>
+      </button>
+
+      <button class="select-button" onclick="showPasswordScreen()">
+        <div class="main">JFOU</div>
+        <div class="sub">パスワード認証後、JFOU専用W&Bへ進みます</div>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     ② JFOU パスワード画面
+========================= -->
+<section id="passwordScreen" class="hidden">
+  <div class="toolbar">
+    <button class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
+  </div>
+
+  <div class="card">
+    <h3>JFOU Password</h3>
+
+    <div class="password-box">
+      <input type="password" id="jfouPassword" placeholder="Password">
+      <button class="primary-button" onclick="unlockJFOU()">解除</button>
+    </div>
+
+    <div id="passwordError" class="error-text hidden">
+      パスワードが違います。
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     ③ JFOU 機体選択画面
+========================= -->
+<section id="jfouAircraftScreen" class="hidden">
+  <div class="toolbar">
+    <button class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
+  </div>
+
+  <div class="card">
+    <h3>Select JFOU Aircraft</h3>
+
+    <div class="base-label">福島</div>
+    <div class="select-grid">
+      <button class="select-button" onclick="selectJFOUAircraft('JA52DA')"><div class="main">JA52DA</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA53DA')"><div class="main">JA53DA</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA55DA')"><div class="main">JA55DA</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA56DA')"><div class="main">JA56DA</div></button>
+    </div>
+
+    <div class="base-label">鹿児島</div>
+    <div class="select-grid">
+      <button class="select-button" onclick="selectJFOUAircraft('JA224T')"><div class="main">JA224T</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA926T')"><div class="main">JA926T</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA999U')"><div class="main">JA999U</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA11HA')"><div class="main">JA11HA</div></button>
+    </div>
+
+    <div class="base-label">仙台</div>
+    <div class="select-grid">
+      <button class="select-button" onclick="selectJFOUAircraft('JA666C')"><div class="main">JA666C</div></button>
+      <button class="select-button" onclick="selectJFOUAircraft('JA666D')"><div class="main">JA666D</div></button>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     ④ W&B 本体画面
+========================= -->
+<section id="calculatorScreen" class="hidden">
+
+  <div class="toolbar">
+    <button class="back-button" onclick="backFromCalculator()">← Back</button>
+    <div>
+      <strong id="selectedAircraftLabel">Aircraft</strong>
+      <span class="subtitle" id="selectedModeLabel"></span>
+    </div>
+  </div>
+
+  <!-- プリセット：基本非表示、タップで表示 -->
+  <details class="card preset-card">
+    <summary>Preset / Aircraft Setting</summary>
+
+    <table class="wb-table" style="margin-top:15px;">
+      <tbody>
+        <tr><td class="left-text">Front seat (in)</td><td id="preset_frontSeat" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Rear seat (in)</td><td id="preset_rearSeat" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Nose baggage (in)</td><td id="preset_noseBaggage" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Cabin baggage (in)</td><td id="preset_cabinBaggage" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Baggage extension (in)</td><td id="preset_baggageExtension" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Fuel (in)</td><td id="preset_fuel" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">De-ice fluid (in)</td><td id="preset_deice" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Max Takeoff Weight</td><td id="preset_mtow" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Max Landing Weight</td><td id="preset_mlw" class="fixed-cell">-</td></tr>
+        <tr><td class="left-text">Max Zero Fuel Weight</td><td id="preset_mzfw" class="fixed-cell">-</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <!-- 入力フォーム -->
+  <div class="card">
+    <h3>Weight Input</h3>
+
     <table class="wb-table">
       <thead>
         <tr>
-          <th class="left-align">Position</th>
-          <th style="width: 60px;">Qty</th>
-          <th style="width: 90px;">Weight (lbs)</th>
-          <th style="width: 70px;">Arm (in)</th>
+          <th class="left-text">Position</th>
+          <th>kg</th>
+          <th>lbs</th>
+          <th>Arm (in)</th>
           <th>Moment (in-lbs)</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td class="left-text">Basic Empty Weight</td>
+          <td class="input-cell"><input type="number" id="bew_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="bew_lbs" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="bew_arm" step="0.1"></td>
+          <td class="calc-cell" id="bew_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Front seat L</td>
+          <td class="input-cell"><input type="number" id="frontL_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="frontL_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_frontL">-</td>
+          <td class="calc-cell" id="frontL_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Front seat R</td>
+          <td class="input-cell"><input type="number" id="frontR_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="frontR_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_frontR">-</td>
+          <td class="calc-cell" id="frontR_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Rear seat L</td>
+          <td class="input-cell"><input type="number" id="rearL_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="rearL_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_rearL">-</td>
+          <td class="calc-cell" id="rearL_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Rear seat R</td>
+          <td class="input-cell"><input type="number" id="rearR_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="rearR_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_rearR">-</td>
+          <td class="calc-cell" id="rearR_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Nose baggage</td>
+          <td class="input-cell"><input type="number" id="nose_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="nose_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_nose">-</td>
+          <td class="calc-cell" id="nose_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Cabin baggage</td>
+          <td class="input-cell"><input type="number" id="cabin_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="cabin_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_cabin">-</td>
+          <td class="calc-cell" id="cabin_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Baggage extension</td>
+          <td class="input-cell"><input type="number" id="extension_kg" step="0.1"></td>
+          <td class="input-cell"><input type="number" id="extension_lbs" step="0.1"></td>
+          <td class="fixed-cell" id="arm_extension">-</td>
+          <td class="calc-cell" id="extension_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">De-ice fluid</td>
+          <td class="input-cell"><input type="number" id="deice_L" step="0.1" placeholder="L"></td>
+          <td class="calc-cell" id="deice_lbs">0</td>
+          <td class="fixed-cell" id="arm_deice">-</td>
+          <td class="calc-cell" id="deice_moment">0</td>
+        </tr>
+
+        <tr class="section-row">
+          <td colspan="2" class="left-text">Zero Fuel Weight</td>
+          <td class="calc-cell" id="zfw_lbs">0</td>
+          <td class="calc-cell" id="zfw_cg">0</td>
+          <td class="calc-cell" id="zfw_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Main fuel</td>
+          <td class="input-cell"><input type="number" id="mainFuel_gal" step="0.1" placeholder="US gal"></td>
+          <td class="calc-cell" id="mainFuel_lbs">0</td>
+          <td class="fixed-cell" id="arm_fuel">-</td>
+          <td class="calc-cell" id="mainFuel_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Taxi fuel</td>
+          <td class="input-cell"><input type="number" id="taxiFuel_gal" step="0.1" placeholder="US gal"></td>
+          <td class="calc-cell" id="taxiFuel_lbs">0</td>
+          <td class="fixed-cell" id="arm_taxiFuel">-</td>
+          <td class="calc-cell" id="taxiFuel_moment">0</td>
+        </tr>
+
+        <tr class="section-row">
+          <td colspan="2" class="left-text">Takeoff Weight</td>
+          <td class="calc-cell" id="tow_lbs">0</td>
+          <td class="calc-cell" id="tow_cg">0</td>
+          <td class="calc-cell" id="tow_moment">0</td>
+        </tr>
+
+        <tr>
+          <td class="left-text">Trip fuel</td>
+          <td class="input-cell"><input type="number" id="tripFuel_gal" step="0.1" placeholder="US gal"></td>
+          <td class="calc-cell" id="tripFuel_lbs">0</td>
+          <td class="fixed-cell" id="arm_tripFuel">-</td>
+          <td class="calc-cell" id="tripFuel_moment">0</td>
+        </tr>
+
+        <tr class="section-row">
+          <td colspan="2" class="left-text">Landing Weight</td>
+          <td class="calc-cell" id="ldg_lbs">0</td>
+          <td class="calc-cell" id="ldg_cg">0</td>
+          <td class="calc-cell" id="ldg_moment">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 計算結果表 -->
+  <div class="card">
+    <h3>Calculation Result</h3>
+
+    <table class="wb-table">
+      <thead>
+        <tr>
+          <th class="left-text">Condition</th>
+          <th>Weight (kg)</th>
+          <th>Weight (lbs)</th>
+          <th>CG (in)</th>
+          <th>Moment</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="left-text">Basic Empty Weight</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="bew_weight" value="3147.1" step="0.1"></td>
-          <td class="input-cell"><input type="number" id="bew_arm" value="94.7" step="0.1"></td>
-          <td class="calc-cell" id="bew_mom">0</td>
+          <td class="left-text">Zero Fuel</td>
+          <td id="result_zfw_kg">0</td>
+          <td id="result_zfw_lbs">0</td>
+          <td id="result_zfw_cg">0</td>
+          <td id="result_zfw_moment">0</td>
+          <td id="result_zfw_status" class="status-ok">-</td>
         </tr>
         <tr>
-          <td class="left-text">Pilot</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="p_w" placeholder="0"></td>
-          <td class="fixed-cell">90.6</td>
-          <td class="calc-cell" id="p_m">0</td>
+          <td class="left-text">Takeoff</td>
+          <td id="result_tow_kg">0</td>
+          <td id="result_tow_lbs">0</td>
+          <td id="result_tow_cg">0</td>
+          <td id="result_tow_moment">0</td>
+          <td id="result_tow_status" class="status-ok">-</td>
         </tr>
         <tr>
-          <td class="left-text">Front Passenger</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="fp_w" placeholder="0"></td>
-          <td class="fixed-cell">90.6</td>
-          <td class="calc-cell" id="fp_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Rear Passenger 1</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="r1_w" placeholder="0"></td>
-          <td class="fixed-cell">128.0</td>
-          <td class="calc-cell" id="r1_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Rear Passenger 2</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="r2_w" placeholder="0"></td>
-          <td class="fixed-cell">128.0</td>
-          <td class="calc-cell" id="r2_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Cargo Nose (Max 66)</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="cn_w" placeholder="0"></td>
-          <td class="fixed-cell">23.6</td>
-          <td class="calc-cell" id="cn_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Cargo Cabin (Max 100)</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="cc_w" placeholder="0"></td>
-          <td class="fixed-cell">153.1</td>
-          <td class="calc-cell" id="cc_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Cargo Extend (Max 40)</td>
-          <td>-</td>
-          <td class="input-cell"><input type="number" id="ce_w" placeholder="0"></td>
-          <td class="fixed-cell">178.7</td>
-          <td class="calc-cell" id="ce_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">De-ice Fluid (9.2 lbs/gal)</td>
-          <td class="input-cell"><input type="number" id="di_g" placeholder="0"></td>
-          <td class="calc-cell" id="di_w">0</td>
-          <td class="fixed-cell">39.4</td>
-          <td class="calc-cell" id="di_m">0</td>
-        </tr>
-        <tr class="section-row">
-          <td colspan="2" class="left-text">Zero Fuel Condition</td>
-          <td class="calc-cell" id="zfw_w">0</td>
-          <td class="calc-cell" id="zfw_cg">0</td>
-          <td class="calc-cell" id="zfw_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Main Fuel Load (7.01 lbs/gal)</td>
-          <td class="input-cell"><input type="number" id="mf_g" placeholder="0"></td>
-          <td class="calc-cell" id="mf_w">0</td>
-          <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="mf_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">AUX Fuel Load (7.01 lbs/gal)</td>
-          <td class="input-cell"><input type="number" id="af_g" placeholder="0"></td>
-          <td class="calc-cell" id="af_w">0</td>
-          <td class="fixed-cell">126.0</td>
-          <td class="calc-cell" id="af_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Runup/Taxi Burn off</td>
-          <td class="fixed-cell">-1.0</td>
-          <td class="fixed-cell">-7.01</td>
-          <td class="fixed-cell">103.5</td>
-          <td class="fixed-cell">-726</td>
-        </tr>
-        <tr class="section-row">
-          <td colspan="2" class="left-text">Takeoff Condition (Max 4189)</td>
-          <td class="calc-cell" id="tow_w">0</td>
-          <td class="calc-cell" id="tow_cg">0</td>
-          <td class="calc-cell" id="tow_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">Main Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="mff_g" placeholder="0"></td>
-          <td class="calc-cell" id="mff_w">0</td>
-          <td class="fixed-cell">103.5</td>
-          <td class="calc-cell" id="mff_m">0</td>
-        </tr>
-        <tr>
-          <td class="left-text">AUX Fuel for Flight</td>
-          <td class="input-cell"><input type="number" id="aff_g" placeholder="0"></td>
-          <td class="calc-cell" id="aff_w">0</td>
-          <td class="fixed-cell">104.5</td>
-          <td class="calc-cell" id="aff_m">0</td>
-        </tr>
-        <tr class="section-row">
-          <td colspan="2" class="left-text">Landing Condition (Max 3979)</td>
-          <td class="calc-cell" id="lw_w">0</td>
-          <td class="calc-cell" id="lw_cg">0</td>
-          <td class="calc-cell" id="lw_m">0</td>
+          <td class="left-text">Landing</td>
+          <td id="result_ldg_kg">0</td>
+          <td id="result_ldg_lbs">0</td>
+          <td id="result_ldg_cg">0</td>
+          <td id="result_ldg_moment">0</td>
+          <td id="result_ldg_status" class="status-ok">-</td>
         </tr>
       </tbody>
     </table>
-  </form>
+  </div>
 
   <div class="result-summary">
-    <div class="card">
-      <h3>Takeoff Weight</h3>
-      <span class="value" id="res_tow">0 lbs</span>
-      <span id="res_tow_status" class="status-ok">Within Limits</span>
+    <div class="mini-card">
+      Max T/O
+      <span class="value" id="summary_mtow">-</span>
     </div>
-    <div class="card">
-      <h3>Landing Weight</h3>
-      <span class="value" id="res_lw">0 lbs</span>
-      <span id="res_lw_status" class="status-ok">Within Limits</span>
+    <div class="mini-card">
+      Takeoff
+      <span class="value" id="summary_tow">0 lbs</span>
     </div>
-    <div class="card">
-      <h3>Req. Flight Time</h3>
-      <span class="value" id="res_burn_time">0 Min</span>
-      <span id="res_burn_status" class="status-ok">Under Max LDG Weight</span>
+    <div class="mini-card">
+      Landing
+      <span class="value" id="summary_ldg">0 lbs</span>
+    </div>
+    <div class="mini-card">
+      CG
+      <span class="value" id="summary_cg">0.00 in</span>
     </div>
   </div>
 
-  <div class="card" style="margin-top: 30px;">
-    <h3>Weight and Balance Chart</h3>
+  <!-- エンベロープ -->
+  <div class="card" style="margin-top: 25px;">
+    <h3>Envelope</h3>
     <div class="chart-wrapper">
-      <div class="chart-legend-overlay">
-        <div class="legend-item"><div class="legend-line l-env"></div>Envelope</div>
-        <div class="legend-item"><div class="legend-line l-zfw"></div>Max Zero Fuel</div>
-        <div class="legend-item"><div class="legend-line l-ldg"></div>MAX Landing Weight</div>
-      </div>
       <div class="chart-container">
         <canvas id="wbChart"></canvas>
       </div>
     </div>
   </div>
 
+</section>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  Chart.defaults.color = '#000';
-  Chart.defaults.font.family = 'Arial';
-  Chart.defaults.font.weight = 'bold';
+/* =========================
+   基本変換
+========================= */
+const KG_TO_LBS = 2.2046226218;
+const LBS_TO_KG = 1 / KG_TO_LBS;
 
-  const ctx = document.getElementById('wbChart').getContext('2d');
-  
-  const envelopePoints = [
-    {x: 92.52, y: 3197},
-    {x: 92.52, y: 3236},
-    {x: 95.20, y: 4189},
-    {x: 97.64, y: 4189},
-    {x: 97.64, y: 3748},
-    {x: 96.61, y: 3197},
-    {x: 92.52, y: 3197} 
-  ];
+/*
+  本番注意：
+  このパスワード方式はフロントエンド上の簡易制御です。
+  本当にJFOU専用として秘匿する場合は、Insightsと同じくCloudflare側のBasic認証やAccessで守るのが安全です。
+*/
+const JFOU_PASSWORD = "CHANGE_ME";
 
-  const wbChart = new Chart(ctx, {
-    type: 'scatter',
+/* =========================
+   機体プリセット
+   数値は今後ここへ集約
+========================= */
+const AIRCRAFT_PRESETS = {
+  DA42_TDI: {
+    label: "DA42 TDI",
+    mode: "Public",
+    arms: {
+      frontSeat: null,
+      rearSeat: null,
+      noseBaggage: null,
+      cabinBaggage: null,
+      baggageExtension: null,
+      fuel: null,
+      deice: null
+    },
+    limits: {
+      mtowLbs: null,
+      mlwLbs: null,
+      mzfwLbs: null
+    },
+    fuel: {
+      lbsPerGal: null
+    },
+    deice: {
+      lbsPerL: null
+    },
+    basicEmpty: {
+      weightLbs: null,
+      arm: null
+    },
+    envelope: [],
+    chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
+  },
+
+  DA42_NG: {
+    label: "DA42 NG",
+    mode: "Public",
+    arms: {
+      frontSeat: 90.6,
+      rearSeat: 128.0,
+      noseBaggage: 23.6,
+      cabinBaggage: 153.1,
+      baggageExtension: 178.7,
+      fuel: 103.5,
+      deice: 39.4
+    },
+    limits: {
+      mtowLbs: 4189,
+      mlwLbs: 3979,
+      mzfwLbs: 3900
+    },
+    fuel: {
+      lbsPerGal: 7.01
+    },
+    deice: {
+      lbsPerL: 9.2 / 3.785411784
+    },
+    basicEmpty: {
+      weightLbs: 3147.1,
+      arm: 94.7
+    },
+    envelope: [
+      {x: 92.52, y: 3197},
+      {x: 92.52, y: 3236},
+      {x: 95.20, y: 4189},
+      {x: 97.64, y: 4189},
+      {x: 97.64, y: 3748},
+      {x: 96.61, y: 3197},
+      {x: 92.52, y: 3197}
+    ],
+    chart: { xMin: 92.0, xMax: 98.0, yMin: 3100, yMax: 4200 }
+  },
+
+  DA42_NG_VI: {
+    label: "DA42 NG-Ⅵ",
+    mode: "Public",
+    arms: {
+      frontSeat: null,
+      rearSeat: null,
+      noseBaggage: null,
+      cabinBaggage: null,
+      baggageExtension: null,
+      fuel: null,
+      deice: null
+    },
+    limits: {
+      mtowLbs: null,
+      mlwLbs: null,
+      mzfwLbs: null
+    },
+    fuel: {
+      lbsPerGal: null
+    },
+    deice: {
+      lbsPerL: null
+    },
+    basicEmpty: {
+      weightLbs: null,
+      arm: null
+    },
+    envelope: [],
+    chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
+  },
+
+  /* =========================
+     JFOU 機体別プリセット
+     今後ここへ実機数値を追加
+  ========================= */
+
+  JA52DA: { label: "JA52DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+  JA53DA: { label: "JA53DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+  JA55DA: { label: "JA55DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+  JA56DA: { label: "JA56DA", mode: "JFOU / 福島", inherit: "DA42_NG" },
+
+  JA224T: { label: "JA224T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
+  JA926T: { label: "JA926T", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
+  JA999U: { label: "JA999U", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
+  JA11HA: { label: "JA11HA", mode: "JFOU / 鹿児島", inherit: "DA42_NG" },
+
+  JA666C: { label: "JA666C", mode: "JFOU / 仙台", inherit: "DA42_NG" },
+  JA666D: { label: "JA666D", mode: "JFOU / 仙台", inherit: "DA42_NG" }
+};
+
+let currentPreset = null;
+let wbChart = null;
+let syncing = false;
+
+/* =========================
+   画面遷移
+========================= */
+function showScreen(screenId) {
+  ["modelSelectScreen", "passwordScreen", "jfouAircraftScreen", "calculatorScreen"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById(screenId).classList.remove("hidden");
+}
+
+function selectPublicAircraft(key) {
+  openCalculator(key);
+}
+
+function showPasswordScreen() {
+  document.getElementById("jfouPassword").value = "";
+  document.getElementById("passwordError").classList.add("hidden");
+  showScreen("passwordScreen");
+}
+
+function unlockJFOU() {
+  const input = document.getElementById("jfouPassword").value;
+  if (input === JFOU_PASSWORD) {
+    showScreen("jfouAircraftScreen");
+  } else {
+    document.getElementById("passwordError").classList.remove("hidden");
+  }
+}
+
+function selectJFOUAircraft(key) {
+  openCalculator(key);
+}
+
+function backFromCalculator() {
+  if (currentPreset && currentPreset.mode && currentPreset.mode.startsWith("JFOU")) {
+    showScreen("jfouAircraftScreen");
+  } else {
+    showScreen("modelSelectScreen");
+  }
+}
+
+/* =========================
+   プリセット取得
+========================= */
+function resolvePreset(key) {
+  const preset = AIRCRAFT_PRESETS[key];
+
+  if (!preset) {
+    return null;
+  }
+
+  if (!preset.inherit) {
+    return structuredClone(preset);
+  }
+
+  const base = structuredClone(AIRCRAFT_PRESETS[preset.inherit]);
+  return {
+    ...base,
+    ...preset,
+    arms: {
+      ...base.arms,
+      ...(preset.arms || {})
+    },
+    limits: {
+      ...base.limits,
+      ...(preset.limits || {})
+    },
+    fuel: {
+      ...base.fuel,
+      ...(preset.fuel || {})
+    },
+    deice: {
+      ...base.deice,
+      ...(preset.deice || {})
+    },
+    basicEmpty: {
+      ...base.basicEmpty,
+      ...(preset.basicEmpty || {})
+    },
+    envelope: preset.envelope || base.envelope,
+    chart: preset.chart || base.chart
+  };
+}
+
+function openCalculator(key) {
+  currentPreset = resolvePreset(key);
+
+  if (!currentPreset) {
+    alert("Preset not found.");
+    return;
+  }
+
+  applyPreset(currentPreset);
+  showScreen("calculatorScreen");
+  calculateWB();
+}
+
+/* =========================
+   表示用関数
+========================= */
+function fmt(value, dec = 1) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "-";
+  return Number(value).toLocaleString(undefined, {
+    minimumFractionDigits: dec,
+    maximumFractionDigits: dec
+  });
+}
+
+function lbsToKg(lbs) {
+  return lbs * LBS_TO_KG;
+}
+
+function setText(id, value, dec = 1) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = fmt(value, dec);
+}
+
+function getNumber(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function setInput(id, value, dec = 1) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    el.value = "";
+  } else {
+    el.value = Number(value).toFixed(dec);
+  }
+}
+
+function setStatus(id, ok, okText = "Within Limits", ngText = "OVER") {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.innerText = ok ? okText : ngText;
+  el.className = ok ? "status-ok" : "status-alert";
+}
+
+/* =========================
+   kg/lbs 入力同期
+========================= */
+function bindWeightPair(kgId, lbsId) {
+  const kg = document.getElementById(kgId);
+  const lbs = document.getElementById(lbsId);
+
+  kg.addEventListener("input", () => {
+    if (syncing) return;
+    syncing = true;
+    lbs.value = kg.value === "" ? "" : (parseFloat(kg.value) * KG_TO_LBS).toFixed(1);
+    syncing = false;
+    calculateWB();
+  });
+
+  lbs.addEventListener("input", () => {
+    if (syncing) return;
+    syncing = true;
+    kg.value = lbs.value === "" ? "" : (parseFloat(lbs.value) * LBS_TO_KG).toFixed(1);
+    syncing = false;
+    calculateWB();
+  });
+}
+
+/* =========================
+   プリセット反映
+========================= */
+function applyPreset(p) {
+  document.getElementById("selectedAircraftLabel").innerText = p.label;
+  document.getElementById("selectedModeLabel").innerText = p.mode || "";
+
+  document.getElementById("preset_frontSeat").innerText = fmt(p.arms.frontSeat, 1);
+  document.getElementById("preset_rearSeat").innerText = fmt(p.arms.rearSeat, 1);
+  document.getElementById("preset_noseBaggage").innerText = fmt(p.arms.noseBaggage, 1);
+  document.getElementById("preset_cabinBaggage").innerText = fmt(p.arms.cabinBaggage, 1);
+  document.getElementById("preset_baggageExtension").innerText = fmt(p.arms.baggageExtension, 1);
+  document.getElementById("preset_fuel").innerText = fmt(p.arms.fuel, 1);
+  document.getElementById("preset_deice").innerText = fmt(p.arms.deice, 1);
+
+  document.getElementById("preset_mtow").innerText =
+    p.limits.mtowLbs ? `${fmt(lbsToKg(p.limits.mtowLbs), 1)} kg / ${fmt(p.limits.mtowLbs, 1)} lbs` : "-";
+  document.getElementById("preset_mlw").innerText =
+    p.limits.mlwLbs ? `${fmt(lbsToKg(p.limits.mlwLbs), 1)} kg / ${fmt(p.limits.mlwLbs, 1)} lbs` : "-";
+  document.getElementById("preset_mzfw").innerText =
+    p.limits.mzfwLbs ? `${fmt(lbsToKg(p.limits.mzfwLbs), 1)} kg / ${fmt(p.limits.mzfwLbs, 1)} lbs` : "-";
+
+  document.getElementById("summary_mtow").innerText =
+    p.limits.mtowLbs ? `${fmt(p.limits.mtowLbs, 0)} lbs` : "-";
+
+  setInput("bew_lbs", p.basicEmpty.weightLbs, 1);
+  setInput("bew_kg", p.basicEmpty.weightLbs ? lbsToKg(p.basicEmpty.weightLbs) : null, 1);
+  setInput("bew_arm", p.basicEmpty.arm, 1);
+
+  document.getElementById("arm_frontL").innerText = fmt(p.arms.frontSeat, 1);
+  document.getElementById("arm_frontR").innerText = fmt(p.arms.frontSeat, 1);
+  document.getElementById("arm_rearL").innerText = fmt(p.arms.rearSeat, 1);
+  document.getElementById("arm_rearR").innerText = fmt(p.arms.rearSeat, 1);
+  document.getElementById("arm_nose").innerText = fmt(p.arms.noseBaggage, 1);
+  document.getElementById("arm_cabin").innerText = fmt(p.arms.cabinBaggage, 1);
+  document.getElementById("arm_extension").innerText = fmt(p.arms.baggageExtension, 1);
+  document.getElementById("arm_deice").innerText = fmt(p.arms.deice, 1);
+  document.getElementById("arm_fuel").innerText = fmt(p.arms.fuel, 1);
+  document.getElementById("arm_taxiFuel").innerText = fmt(p.arms.fuel, 1);
+  document.getElementById("arm_tripFuel").innerText = fmt(p.arms.fuel, 1);
+
+  resetVariableInputs();
+  initChart(p);
+}
+
+/* =========================
+   可変入力リセット
+========================= */
+function resetVariableInputs() {
+  [
+    "frontL_kg", "frontL_lbs",
+    "frontR_kg", "frontR_lbs",
+    "rearL_kg", "rearL_lbs",
+    "rearR_kg", "rearR_lbs",
+    "nose_kg", "nose_lbs",
+    "cabin_kg", "cabin_lbs",
+    "extension_kg", "extension_lbs",
+    "deice_L",
+    "mainFuel_gal",
+    "taxiFuel_gal",
+    "tripFuel_gal"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+}
+
+/* =========================
+   W&B計算
+========================= */
+function moment(weightLbs, armIn) {
+  return weightLbs * (armIn || 0);
+}
+
+function calculateWB() {
+  if (!currentPreset) return;
+
+  const a = currentPreset.arms;
+  const limits = currentPreset.limits;
+  const fuelLbsPerGal = currentPreset.fuel.lbsPerGal || 0;
+  const deiceLbsPerL = currentPreset.deice.lbsPerL || 0;
+
+  const bewW = getNumber("bew_lbs");
+  const bewArm = getNumber("bew_arm");
+  const bewM = moment(bewW, bewArm);
+
+  const frontLW = getNumber("frontL_lbs");
+  const frontRW = getNumber("frontR_lbs");
+  const rearLW = getNumber("rearL_lbs");
+  const rearRW = getNumber("rearR_lbs");
+
+  const noseW = getNumber("nose_lbs");
+  const cabinW = getNumber("cabin_lbs");
+  const extensionW = getNumber("extension_lbs");
+
+  const deiceW = getNumber("deice_L") * deiceLbsPerL;
+  const mainFuelW = getNumber("mainFuel_gal") * fuelLbsPerGal;
+  const taxiFuelW = getNumber("taxiFuel_gal") * fuelLbsPerGal;
+  const tripFuelW = getNumber("tripFuel_gal") * fuelLbsPerGal;
+
+  const frontLM = moment(frontLW, a.frontSeat);
+  const frontRM = moment(frontRW, a.frontSeat);
+  const rearLM = moment(rearLW, a.rearSeat);
+  const rearRM = moment(rearRW, a.rearSeat);
+
+  const noseM = moment(noseW, a.noseBaggage);
+  const cabinM = moment(cabinW, a.cabinBaggage);
+  const extensionM = moment(extensionW, a.baggageExtension);
+  const deiceM = moment(deiceW, a.deice);
+  const mainFuelM = moment(mainFuelW, a.fuel);
+  const taxiFuelM = moment(taxiFuelW, a.fuel);
+  const tripFuelM = moment(tripFuelW, a.fuel);
+
+  setText("bew_moment", bewM, 0);
+  setText("frontL_moment", frontLM, 0);
+  setText("frontR_moment", frontRM, 0);
+  setText("rearL_moment", rearLM, 0);
+  setText("rearR_moment", rearRM, 0);
+  setText("nose_moment", noseM, 0);
+  setText("cabin_moment", cabinM, 0);
+  setText("extension_moment", extensionM, 0);
+  setText("deice_lbs", deiceW, 1);
+  setText("deice_moment", deiceM, 0);
+  setText("mainFuel_lbs", mainFuelW, 1);
+  setText("mainFuel_moment", mainFuelM, 0);
+  setText("taxiFuel_lbs", -taxiFuelW, 1);
+  setText("taxiFuel_moment", -taxiFuelM, 0);
+  setText("tripFuel_lbs", -tripFuelW, 1);
+  setText("tripFuel_moment", -tripFuelM, 0);
+
+  const zfwW = bewW + frontLW + frontRW + rearLW + rearRW + noseW + cabinW + extensionW + deiceW;
+  const zfwM = bewM + frontLM + frontRM + rearLM + rearRM + noseM + cabinM + extensionM + deiceM;
+  const zfwCG = zfwW > 0 ? zfwM / zfwW : 0;
+
+  const rampW = zfwW + mainFuelW;
+  const rampM = zfwM + mainFuelM;
+
+  const towW = rampW - taxiFuelW;
+  const towM = rampM - taxiFuelM;
+  const towCG = towW > 0 ? towM / towW : 0;
+
+  const ldgW = towW - tripFuelW;
+  const ldgM = towM - tripFuelM;
+  const ldgCG = ldgW > 0 ? ldgM / ldgW : 0;
+
+  setText("zfw_lbs", zfwW, 1);
+  setText("zfw_moment", zfwM, 0);
+  setText("zfw_cg", zfwCG, 2);
+
+  setText("tow_lbs", towW, 1);
+  setText("tow_moment", towM, 0);
+  setText("tow_cg", towCG, 2);
+
+  setText("ldg_lbs", ldgW, 1);
+  setText("ldg_moment", ldgM, 0);
+  setText("ldg_cg", ldgCG, 2);
+
+  setText("result_zfw_kg", lbsToKg(zfwW), 1);
+  setText("result_zfw_lbs", zfwW, 1);
+  setText("result_zfw_cg", zfwCG, 2);
+  setText("result_zfw_moment", zfwM, 0);
+
+  setText("result_tow_kg", lbsToKg(towW), 1);
+  setText("result_tow_lbs", towW, 1);
+  setText("result_tow_cg", towCG, 2);
+  setText("result_tow_moment", towM, 0);
+
+  setText("result_ldg_kg", lbsToKg(ldgW), 1);
+  setText("result_ldg_lbs", ldgW, 1);
+  setText("result_ldg_cg", ldgCG, 2);
+  setText("result_ldg_moment", ldgM, 0);
+
+  setStatus(
+    "result_zfw_status",
+    !limits.mzfwLbs || zfwW <= limits.mzfwLbs,
+    "Within Limits",
+    "OVER ZFW"
+  );
+
+  setStatus(
+    "result_tow_status",
+    !limits.mtowLbs || towW <= limits.mtowLbs,
+    "Within Limits",
+    "OVER TOW"
+  );
+
+  setStatus(
+    "result_ldg_status",
+    !limits.mlwLbs || ldgW <= limits.mlwLbs,
+    "Within Limits",
+    "OVER LDG"
+  );
+
+  document.getElementById("summary_tow").innerText = `${fmt(towW, 1)} lbs`;
+  document.getElementById("summary_ldg").innerText = `${fmt(ldgW, 1)} lbs`;
+  document.getElementById("summary_cg").innerText = `${fmt(towCG, 2)} in`;
+
+  updateChart(zfwCG, zfwW, rampW > 0 ? rampM / rampW : 0, rampW, towCG, towW, ldgCG, ldgW);
+}
+
+/* =========================
+   チャート
+========================= */
+function initChart(p) {
+  const ctx = document.getElementById("wbChart").getContext("2d");
+
+  if (wbChart) {
+    wbChart.destroy();
+  }
+
+  wbChart = new Chart(ctx, {
+    type: "scatter",
     data: {
       datasets: [
         {
-          label: 'Envelope',
-          data: envelopePoints,
+          label: "Envelope",
+          data: p.envelope || [],
           showLine: true,
-          borderColor: '#444444', 
-          borderWidth: 5,
+          borderColor: "#444",
+          borderWidth: 4,
           pointRadius: 0,
           fill: false,
-          tension: 0,
-          order: 1
+          tension: 0
         },
         {
-          label: 'Max Zero Fuel',
-          data: [{x: 92, y: 3900}, {x: 98, y: 3900}],
-          showLine: true,
-          borderColor: 'red',
-          borderDash: [10, 5],
-          borderWidth: 2,
-          pointRadius: 0,
-          order: 2
-        },
-        {
-          label: 'MAX Landing Weight',
-          data: [{x: 92, y: 3979}, {x: 98, y: 3979}],
-          showLine: true,
-          borderColor: '#0078D4',
-          borderDash: [2, 3],
-          borderWidth: 3,
-          pointRadius: 0,
-          order: 3
-        },
-        {
-          label: 'Flight States',
+          label: "Flight States",
           data: [],
-          backgroundColor: ['orange', 'green', 'blue'],
-          borderColor: 'black',
+          backgroundColor: ["orange", "purple", "green", "blue"],
+          borderColor: "black",
           borderWidth: 1,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          order: 0
+          pointRadius: 6
         }
       ]
     },
@@ -406,129 +1189,72 @@ document.addEventListener('DOMContentLoaded', function() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: { display: true },
         tooltip: {
-          enabled: true,
           callbacks: {
-            label: (ctx) => `${ctx.raw.label || ''}: ${ctx.raw.x.toFixed(2)} in, ${ctx.raw.y.toFixed(0)} lbs`
+            label: (ctx) => {
+              const r = ctx.raw;
+              return `${r.label || ""}: ${r.x.toFixed(2)} in / ${r.y.toFixed(1)} lbs`;
+            }
           }
         }
       },
       scales: {
-        x: { 
-          min: 92.0, max: 98.0, 
-          grid: { color: '#000000', lineWidth: 1 },
-          ticks: {
-            stepSize: 0.5,
-            color: '#000',
-            font: { size: 14, weight: 'bold' },
-            callback: value => (value % 2 === 0) ? value : ''
-          },
-          title: { display: true, text: 'C.G. - Inches Aft of Datum', font: { size: 16, weight: 'bold' } }
+        x: {
+          min: p.chart.xMin,
+          max: p.chart.xMax,
+          title: {
+            display: true,
+            text: "C.G. - Inches Aft of Datum"
+          }
         },
-        y: { 
-          min: 3100, max: 4200, 
-          grid: { color: '#000000', lineWidth: 1 },
-          ticks: {
-            stepSize: 100,
-            color: '#000',
-            font: { size: 14, weight: 'bold' },
-            callback: value => ((value - 3100) % 200 === 0) ? value : ''
-          },
-          title: { display: true, text: 'Weight (lbs)', font: { size: 16, weight: 'bold' } }
+        y: {
+          min: p.chart.yMin,
+          max: p.chart.yMax,
+          title: {
+            display: true,
+            text: "Weight (lbs)"
+          }
         }
       }
     }
   });
+}
 
-  function calculate() {
-    const getVal = (id) => parseFloat(document.getElementById(id).value) || 0;
-    const setTxt = (id, val, dec = 0) => {
-      const el = document.getElementById(id);
-      if(el) el.innerText = val.toLocaleString(undefined, {minimumFractionDigits: dec, maximumFractionDigits: dec});
-    };
+function updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW) {
+  if (!wbChart) return;
 
-    const bw = getVal('bew_weight'), ba = getVal('bew_arm'), bm = bw * ba;
-    setTxt('bew_mom', bm);
+  const points = [];
 
-    const pW = getVal('p_w') + getVal('fp_w'), pM = pW * 90.6;
-    setTxt('p_m', getVal('p_w') * 90.6); setTxt('fp_m', getVal('fp_w') * 90.6);
+  if (zfwW > 0) points.push({ x: zfwCG, y: zfwW, label: "ZFW" });
+  if (rampW > 0) points.push({ x: rampCG, y: rampW, label: "RAMP" });
+  if (towW > 0) points.push({ x: towCG, y: towW, label: "T/O" });
+  if (ldgW > 0) points.push({ x: ldgCG, y: ldgW, label: "LDG" });
 
-    const rW = getVal('r1_w') + getVal('r2_w'), rM = rW * 128.0;
-    setTxt('r1_m', getVal('r1_w') * 128.0); setTxt('r2_m', getVal('r2_w') * 128.0);
+  wbChart.data.datasets[1].data = points;
+  wbChart.update();
+}
 
-    const cnW = getVal('cn_w'), cnM = cnW * 23.6; setTxt('cn_m', cnM);
-    const ccW = getVal('cc_w'), ccM = ccW * 153.1; setTxt('cc_m', ccM);
-    const ceW = getVal('ce_w'), ceM = ceW * 178.7; setTxt('ce_m', ceM);
+/* =========================
+   初期化
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  [
+    ["bew_kg", "bew_lbs"],
+    ["frontL_kg", "frontL_lbs"],
+    ["frontR_kg", "frontR_lbs"],
+    ["rearL_kg", "rearL_lbs"],
+    ["rearR_kg", "rearR_lbs"],
+    ["nose_kg", "nose_lbs"],
+    ["cabin_kg", "cabin_lbs"],
+    ["extension_kg", "extension_lbs"]
+  ].forEach(pair => bindWeightPair(pair[0], pair[1]));
 
-    const diW = getVal('di_g') * 9.2, diM = diW * 39.4;
-    setTxt('di_w', diW, 1); setTxt('di_m', diM);
+  document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", calculateWB);
+  });
 
-    const zfwW = bw + pW + rW + cnW + ccW + ceW + diW;
-    const zfwM = bm + pM + rM + cnM + ccM + ceM + diM;
-    const zfwCG = zfwW > 0 ? zfwM / zfwW : 0;
-    setTxt('zfw_w', zfwW, 1); setTxt('zfw_m', zfwM); setTxt('zfw_cg', zfwCG, 2);
-
-    const mfW = getVal('mf_g') * 7.01, mfM = mfW * 103.5;
-    const afW = getVal('af_g') * 7.01, afM = afW * 126.0;
-    setTxt('mf_w', mfW, 1); setTxt('mf_m', mfM);
-    setTxt('af_w', afW, 1); setTxt('af_m', afM);
-
-    const towW = zfwW + mfW + afW - 7.01;
-    const towM = zfwM + mfM + afM - 726;
-    const towCG = towW > 0 ? towM / towW : 0;
-    setTxt('tow_w', towW, 1); setTxt('tow_m', towM); setTxt('tow_cg', towCG, 2);
-
-    const mffVal = getVal('mff_g'), affVal = getVal('aff_g');
-    const mffWeight = -(mffVal * 7.01), affWeight = -(affVal * 7.01);
-    const mffMoment = mffWeight * 103.5, affMoment = affWeight * 104.5;
-
-    setTxt('mff_w', mffWeight, 1); setTxt('mff_m', mffMoment);
-    setTxt('aff_w', affWeight, 1); setTxt('aff_m', affMoment);
-
-    const lwW = towW + mffWeight + affWeight;
-    const lwM = towM + mffMoment + affMoment;
-    const lwCG = lwW > 0 ? lwM / lwW : 0;
-    setTxt('lw_w', lwW, 1); setTxt('lw_m', lwM); setTxt('lw_cg', lwCG, 2);
-
-    document.getElementById('res_tow').innerText = towW.toFixed(1) + " lbs";
-    document.getElementById('res_lw').innerText = lwW.toFixed(1) + " lbs";
-
-    // 変更箇所：T/O CGの代わりに要求飛行時間を計算
-    const maxLdgWeight = 3979; // DA42NG Max Landing Weight
-    if (towW > maxLdgWeight) {
-      const excessWeight = towW - maxLdgWeight;
-      const gallonsNeeded = excessWeight / 7.01; // 1gal = 7.01 lbsとして計算
-      const minutesNeeded = Math.ceil(gallonsNeeded) * 6; // 1gal単位（6分単位）に切り上げ
-      
-      document.getElementById('res_burn_time').innerText = minutesNeeded + " Min";
-      document.getElementById('res_burn_status').innerText = "To reach Max LDG Weight";
-      document.getElementById('res_burn_status').className = "status-alert";
-    } else {
-      document.getElementById('res_burn_time').innerText = "0 Min";
-      document.getElementById('res_burn_status').innerText = "Under Max LDG Weight";
-      document.getElementById('res_burn_status').className = "status-ok";
-    }
-
-    const towS = document.getElementById('res_tow_status');
-    towS.innerText = towW > 4189 ? "OVERWEIGHT!" : "Within Limits";
-    towS.className = towW > 4189 ? "status-alert" : "status-ok";
-
-    const lwS = document.getElementById('res_lw_status');
-    lwS.innerText = lwW > 3979 ? "OVERWEIGHT!" : "Within Limits";
-    lwS.className = lwW > 3979 ? "status-alert" : "status-ok";
-
-    const points = [];
-    if(zfwW > 0) points.push({x: zfwCG, y: zfwW, label: 'ZFW'});
-    if(towW > 0) points.push({x: towCG, y: towW, label: 'TOW'});
-    if(lwW > 0)  points.push({x: lwCG, y: lwW, label: 'LDG'});
-
-    wbChart.data.datasets[3].data = points;
-    wbChart.update();
-  }
-
-  document.querySelectorAll('input').forEach(i => i.addEventListener('input', calculate));
-  calculate();
+  showScreen("modelSelectScreen");
 });
 </script>
 
