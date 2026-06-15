@@ -363,6 +363,22 @@
 
   .blank-cell { color: var(--text-sub); }
 
+  .landing-advisory {
+    margin-top: 16px;
+    padding: 13px 14px;
+    border: 1px solid #cfe8ff;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 10px 10px 0;
+    background: var(--primary-soft);
+    color: var(--text-main);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .landing-advisory strong {
+    color: var(--primary-dark);
+  }
+
 
   .chart-wrapper {
     position: relative;
@@ -433,7 +449,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v23</span>
+  <span class="subtitle">Beta v24</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -614,6 +630,7 @@
         <tr class="section-row"><td>Landing Condition</td><td class="blank-cell">-</td><td id="result_ldg_weight">0</td><td id="result_ldg_cg">0</td><td id="result_ldg_moment">0</td><td id="result_ldg_status" class="status-ok">-</td></tr>
       </tbody>
     </table>
+    <div id="kagoshimaLandingAdvisory" class="landing-advisory hidden"></div>
   </div>
 
 
@@ -1177,8 +1194,12 @@ function inputWeightToLbs(value) { return currentUnit === "metric" ? kgToLbs(val
 function displayArm(inches) { return currentUnit === "metric" ? inToM(inches) : inches; }
 function inputArmToIn(value) { return currentUnit === "metric" ? mToIn(value) : value; }
 function displayMoment(inLbs) { return currentUnit === "metric" ? momentToKgM(inLbs) : inLbs; }
-function usesDeiceGal() {
+function isKagoshimaAircraft() {
   return !!(currentPreset && currentPreset.mode && currentPreset.mode.includes("鹿児島"));
+}
+
+function usesDeiceGal() {
+  return isKagoshimaAircraft();
 }
 
 function getDeiceVolumeUnit() {
@@ -1407,6 +1428,35 @@ function setConditionRow(prefix, weightLbs, cgIn, momentInLbs) {
   setText(`result_${prefix}_moment`, displayMoment(momentInLbs), unit.momentDec);
 }
 
+function updateKagoshimaLandingAdvisory(towWeightLbs, maxLandingWeightLbs, fuelLbsPerGal) {
+  const el = document.getElementById("kagoshimaLandingAdvisory");
+  if (!el) return;
+
+  if (!isKagoshimaAircraft()) {
+    el.classList.add("hidden");
+    el.innerHTML = "";
+    return;
+  }
+
+  if (!hasNumber(maxLandingWeightLbs) || !hasNumber(fuelLbsPerGal) || fuelLbsPerGal <= 0) {
+    el.classList.remove("hidden");
+    el.innerHTML = "<strong>Landing after takeoff</strong><br>最大着陸重量または燃料係数が未設定のため、計算できません。";
+    return;
+  }
+
+  const excessLbs = Math.max(0, towWeightLbs - maxLandingWeightLbs);
+  const requiredFuelGal = excessLbs / fuelLbsPerGal;
+  const rawMinutes = (requiredFuelGal / 10) * 60;
+  const waitMinutes = excessLbs <= 0 ? 0 : Math.ceil(rawMinutes - 1e-9);
+
+  const detailText = waitMinutes === 0
+    ? "離陸直後に最大着陸重量以内で着陸可能です。"
+    : `最大着陸重量以内に収めるには、約${fmt(requiredFuelGal, 1)} US galの燃料消費が必要です。`;
+
+  el.classList.remove("hidden");
+  el.innerHTML = `<strong>Landing after takeoff</strong><br>${detailText}<br>着陸可能時間：<strong>${waitMinutes}分後</strong>から着陸可能（燃料消費10 US gal/hで計算）`;
+}
+
 function calculateWB() {
   if (!currentPreset) return;
   syncPresetFromForm();
@@ -1490,6 +1540,7 @@ function calculateWB() {
   setLimitStatus("result_tow_status", towW, "mtow", limits.mtow);
   setLimitStatus("result_ldg_status", ldgW, "mlw", limits.mlw);
 
+  updateKagoshimaLandingAdvisory(towW, limits.mlw, fuelLbsPerGal);
 
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
