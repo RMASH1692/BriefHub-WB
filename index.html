@@ -433,7 +433,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v21</span>
+  <span class="subtitle">Beta v23</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -1013,11 +1013,27 @@ function syncLimitPairFromKg(p) {
   p.limitsKg = p.limitsKg || {};
   p.limitsLbs = p.limitsLbs || {};
   ["mtow", "mlw", "mzfw"].forEach(key => {
-    if (hasNumber(p.limitsKg[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
+    if (hasNumber(p.limitsKg[key]) && !hasNumber(p.limitsLbs[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
   });
 }
 
 function syncLimitPairFromLbs(p) {
+  p.limitsLbs = p.limitsLbs || {};
+  p.limitsKg = p.limitsKg || {};
+  ["mtow", "mlw", "mzfw"].forEach(key => {
+    if (hasNumber(p.limitsLbs[key]) && !hasNumber(p.limitsKg[key])) p.limitsKg[key] = lbsToKg(p.limitsLbs[key]);
+  });
+}
+
+function forceLimitPairFromKg(p) {
+  p.limitsKg = p.limitsKg || {};
+  p.limitsLbs = p.limitsLbs || {};
+  ["mtow", "mlw", "mzfw"].forEach(key => {
+    if (hasNumber(p.limitsKg[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
+  });
+}
+
+function forceLimitPairFromLbs(p) {
   p.limitsLbs = p.limitsLbs || {};
   p.limitsKg = p.limitsKg || {};
   ["mtow", "mlw", "mzfw"].forEach(key => {
@@ -1029,12 +1045,12 @@ function applyIndividualLimitOverride(resolved, originalPreset) {
   if (!originalPreset || !originalPreset.inherit) return;
 
   if (hasOwnLimitObject(originalPreset, "limitsKg")) {
-    syncLimitPairFromKg(resolved);
+    forceLimitPairFromKg(resolved);
     return;
   }
 
   if (hasOwnLimitObject(originalPreset, "limitsLbs")) {
-    syncLimitPairFromLbs(resolved);
+    forceLimitPairFromLbs(resolved);
   }
 }
 
@@ -1124,6 +1140,27 @@ function getActiveLimitsLbs() {
   };
 }
 
+function getActiveLimitsKg() {
+  const source = currentPreset.limitsKg || {};
+  if (currentUnit !== "imperial" || !currentPreset.limitsLbs) return source;
+
+  return {
+    mtow: hasNumber(currentPreset.limitsLbs.mtow) ? lbsToKg(currentPreset.limitsLbs.mtow) : source.mtow,
+    mlw: hasNumber(currentPreset.limitsLbs.mlw) ? lbsToKg(currentPreset.limitsLbs.mlw) : source.mlw,
+    mzfw: hasNumber(currentPreset.limitsLbs.mzfw) ? lbsToKg(currentPreset.limitsLbs.mzfw) : source.mzfw
+  };
+}
+
+function getActiveLimitDisplayValue(key, limitLbs) {
+  if (currentUnit === "metric" && currentPreset.limitsKg && hasNumber(currentPreset.limitsKg[key])) {
+    return currentPreset.limitsKg[key];
+  }
+  if (currentUnit === "imperial" && currentPreset.limitsLbs && hasNumber(currentPreset.limitsLbs[key])) {
+    return currentPreset.limitsLbs[key];
+  }
+  return displayWeight(limitLbs);
+}
+
 function fmt(value, dec = 1) {
   if (value === null || value === undefined || Number.isNaN(value)) return "-";
   return Number(value).toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
@@ -1140,8 +1177,22 @@ function inputWeightToLbs(value) { return currentUnit === "metric" ? kgToLbs(val
 function displayArm(inches) { return currentUnit === "metric" ? inToM(inches) : inches; }
 function inputArmToIn(value) { return currentUnit === "metric" ? mToIn(value) : value; }
 function displayMoment(inLbs) { return currentUnit === "metric" ? momentToKgM(inLbs) : inLbs; }
-function displayDeiceVolume(liters) { return currentUnit === "metric" ? liters : deiceLitersToGal(liters); }
-function inputDeiceToLiters(value) { return currentUnit === "metric" ? value : deiceGalToLiters(value); }
+function usesDeiceGal() {
+  return !!(currentPreset && currentPreset.mode && currentPreset.mode.includes("鹿児島"));
+}
+
+function getDeiceVolumeUnit() {
+  return usesDeiceGal() ? "US gal" : "L";
+}
+
+function displayDeiceVolume(liters) {
+  return usesDeiceGal() ? deiceLitersToGal(liters) : liters;
+}
+
+function inputDeiceToLiters(value) {
+  return usesDeiceGal() ? deiceGalToLiters(value) : value;
+}
+
 function deiceLitersToGal(liters) { return (liters * DEICE_KG_PER_L * KG_TO_LBS) / DEICE_LBS_PER_GAL; }
 function deiceGalToLiters(gallons) { return (gallons * DEICE_LBS_PER_GAL * LBS_TO_KG) / DEICE_KG_PER_L; }
 
@@ -1165,7 +1216,7 @@ function setText(id, value, dec = 1) {
   if (el) el.innerText = fmt(value, dec);
 }
 
-function setLimitStatus(id, actualLbs, limitLbs) {
+function setLimitStatus(id, actualLbs, limitKey, limitLbs) {
   const el = document.getElementById(id);
   if (!el) return;
 
@@ -1176,7 +1227,7 @@ function setLimitStatus(id, actualLbs, limitLbs) {
   }
 
   const unit = getUnit();
-  el.innerText = `${fmt(displayWeight(limitLbs), unit.weightDec)} ${unit.weight}`;
+  el.innerText = `${fmt(getActiveLimitDisplayValue(limitKey, limitLbs), unit.weightDec)} ${unit.weight}`;
   el.className = actualLbs <= limitLbs ? "status-ok" : "status-alert";
 }
 
@@ -1205,7 +1256,7 @@ function updateUnitUI() {
 
   document.querySelectorAll(".weight-unit").forEach(el => { el.innerText = unit.weight; });
   document.querySelectorAll(".arm-unit").forEach(el => { el.innerText = unit.arm; });
-  document.getElementById("deiceUnitLabel").innerText = unit.deiceVolume;
+  document.getElementById("deiceUnitLabel").innerText = getDeiceVolumeUnit();
 
   document.getElementById("resultWeightHeader").innerText = `Weight (${unit.weight})`;
   document.getElementById("resultArmHeader").innerText = `Arm / CG (${unit.arm})`;
@@ -1219,6 +1270,7 @@ function updateUnitUI() {
   setInputStep("preset_fuel", unit.armStep);
   setInputStep("preset_deice", unit.armStep);
   setInputStep("bew_arm", unit.armStep);
+  setInputStep("deice", "0.1");
   ["preset_mtow", "preset_mlw", "preset_mzfw", "bew", "frontL", "frontR", "rearL", "rearR", "nose", "cabin", "extension"].forEach(id => setInputStep(id, unit.weightStep));
 
   if (currentUnit === "metric") {
@@ -1273,7 +1325,6 @@ function syncPresetFromForm() {
     currentPreset.limitsKg.mtow = getNullableNumber("preset_mtow");
     currentPreset.limitsKg.mlw = getNullableNumber("preset_mlw");
     currentPreset.limitsKg.mzfw = getNullableNumber("preset_mzfw");
-    syncLimitPairFromKg(currentPreset);
   } else {
     currentPreset.armsIn.frontSeat = getNullableNumber("preset_frontSeat");
     currentPreset.armsIn.rearSeat = getNullableNumber("preset_rearSeat");
@@ -1286,7 +1337,6 @@ function syncPresetFromForm() {
     currentPreset.limitsLbs.mtow = getNullableNumber("preset_mtow");
     currentPreset.limitsLbs.mlw = getNullableNumber("preset_mlw");
     currentPreset.limitsLbs.mzfw = getNullableNumber("preset_mzfw");
-    syncLimitPairFromLbs(currentPreset);
   }
 }
 
@@ -1409,7 +1459,7 @@ function calculateWB() {
   setResultRow("taxiFuel", -taxiFuelW, a.fuel, -taxiFuelM);
   setResultRow("tripFuel", -tripFuelW, a.fuel, -tripFuelM);
 
-  document.getElementById("res_deice_qty").innerText = `${fmt(displayDeiceVolume(inputState.deiceL || 0), 1)} ${unit.deiceVolume}`;
+  document.getElementById("res_deice_qty").innerText = `${fmt(displayDeiceVolume(inputState.deiceL || 0), 1)} ${getDeiceVolumeUnit()}`;
   document.getElementById("res_mainFuel_qty").innerText = fmt(inputState.mainFuelGal || 0, 1);
   document.getElementById("res_taxiFuel_qty").innerText = fmt(inputState.taxiFuelGal || 0, 1);
   document.getElementById("res_tripFuel_qty").innerText = fmt(inputState.tripFuelGal || 0, 1);
@@ -1435,48 +1485,74 @@ function calculateWB() {
   setConditionRow("tow", towW, towCG, towM);
   setConditionRow("ldg", ldgW, ldgCG, ldgM);
 
-  setLimitStatus("result_zfw_status", zfwW, limits.mzfw);
-  setLimitStatus("result_ramp_status", rampW, limits.mtow);
-  setLimitStatus("result_tow_status", towW, limits.mtow);
-  setLimitStatus("result_ldg_status", ldgW, limits.mlw);
+  setLimitStatus("result_zfw_status", zfwW, "mzfw", limits.mzfw);
+  setLimitStatus("result_ramp_status", rampW, "mtow", limits.mtow);
+  setLimitStatus("result_tow_status", towW, "mtow", limits.mtow);
+  setLimitStatus("result_ldg_status", ldgW, "mlw", limits.mlw);
 
 
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
 
 function buildEnvelopePoints(p, activeLimits) {
-  const mtow = activeLimits && hasNumber(activeLimits.mtow)
+  const limitsKg = getActiveLimitsKg();
+  const mtowLbs = activeLimits && hasNumber(activeLimits.mtow)
     ? activeLimits.mtow
     : (p.limitsLbs ? p.limitsLbs.mtow : null);
+  const mtowKg = limitsKg && hasNumber(limitsKg.mtow)
+    ? limitsKg.mtow
+    : (hasNumber(mtowLbs) ? lbsToKg(mtowLbs) : null);
 
-  if (!hasNumber(mtow)) return p.envelope || [];
+  if (!hasNumber(mtowLbs) && !hasNumber(mtowKg)) return p.envelope || [];
 
   if (p.envelopeType === "TDI") {
     return [
-      { x: 92.52, y: 2756 },
-      { x: 92.52, y: 3236 },
-      { x: 94.49, y: mtow },
-      { x: 98.03, y: mtow },
-      { x: 98.03, y: 3527 },
-      { x: 95.28, y: 2756 },
-      { x: 92.52, y: 2756 }
+      { x: 92.52, xM: 2.35, y: 2756, yKg: 1250 },
+      { x: 92.52, xM: 2.35, y: 3236, yKg: 1468 },
+      { x: 94.49, xM: 2.40, y: mtowLbs, yKg: mtowKg },
+      { x: 98.03, xM: 2.49, y: mtowLbs, yKg: mtowKg },
+      { x: 98.03, xM: 2.49, y: 3527, yKg: 1600 },
+      { x: 95.28, xM: 2.42, y: 2756, yKg: 1250 },
+      { x: 92.52, xM: 2.35, y: 2756, yKg: 1250 }
     ];
   }
 
   if (p.envelopeType === "NG") {
-    const forwardMtowArm = mtow > 4300 ? 95.83 : 95.20;
+    const highMtow = (hasNumber(mtowKg) && mtowKg > 1950) || (hasNumber(mtowLbs) && mtowLbs > 4300);
+    const forwardMtowArmIn = highMtow ? 95.83 : 95.20;
+    const forwardMtowArmM = highMtow ? 2.434 : 2.418;
     return [
-      { x: 92.52, y: 3197 },
-      { x: 92.52, y: 3236 },
-      { x: forwardMtowArm, y: mtow },
-      { x: 97.64, y: mtow },
-      { x: 97.64, y: 3748 },
-      { x: 96.61, y: 3197 },
-      { x: 92.52, y: 3197 }
+      { x: 92.52, xM: 2.350, y: 3197, yKg: 1450 },
+      { x: 92.52, xM: 2.350, y: 3236, yKg: 1468 },
+      { x: forwardMtowArmIn, xM: forwardMtowArmM, y: mtowLbs, yKg: mtowKg },
+      { x: 97.64, xM: 2.480, y: mtowLbs, yKg: mtowKg },
+      { x: 97.64, xM: 2.480, y: 3748, yKg: 1700 },
+      { x: 96.61, xM: 2.454, y: 3197, yKg: 1450 },
+      { x: 92.52, xM: 2.350, y: 3197, yKg: 1450 }
     ];
   }
 
   return p.envelope || [];
+}
+
+function chartPointX(point) {
+  if (currentUnit === "metric" && hasNumber(point.xM)) return point.xM;
+  return currentUnit === "metric" ? inToM(point.x) : point.x;
+}
+
+function chartPointY(point) {
+  if (currentUnit === "metric" && hasNumber(point.yKg)) return point.yKg;
+  return currentUnit === "metric" ? lbsToKg(point.y) : point.y;
+}
+
+function chartX(valueIn) { return currentUnit === "metric" ? inToM(valueIn) : valueIn; }
+function chartY(valueLbs) { return currentUnit === "metric" ? lbsToKg(valueLbs) : valueLbs; }
+
+function chartLimitY(limitKey, limitLbs) {
+  if (currentUnit === "metric" && currentPreset.limitsKg && hasNumber(currentPreset.limitsKg[limitKey])) {
+    return currentPreset.limitsKg[limitKey];
+  }
+  return chartY(limitLbs);
 }
 
 function chartX(valueIn) { return currentUnit === "metric" ? inToM(valueIn) : valueIn; }
@@ -1491,14 +1567,14 @@ function initChart(p) {
 
   const chartBounds = p.chart || { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 };
   const activeLimits = getActiveLimitsLbs();
-  const envelopeData = buildEnvelopePoints(p, activeLimits).map(point => ({ x: chartX(point.x), y: chartY(point.y) }));
+  const envelopeData = buildEnvelopePoints(p, activeLimits).map(point => ({ x: chartPointX(point), y: chartPointY(point) }));
   const datasets = [
     { label: "Envelope", data: envelopeData, showLine: true, borderColor: "#334155", borderWidth: 4, pointRadius: 0, fill: false, tension: 0 },
     { label: "Flight States", data: [], backgroundColor: ["orange", "purple", "green", "blue"], borderColor: "black", borderWidth: 1, pointRadius: 6 }
   ];
 
-  if (activeLimits.mzfw) datasets.push({ label: "Max Zero Fuel", data: [{x: chartX(chartBounds.xMin), y: chartY(activeLimits.mzfw)}, {x: chartX(chartBounds.xMax), y: chartY(activeLimits.mzfw)}], showLine: true, borderColor: "#d32f2f", borderDash: [8, 5], pointRadius: 0, borderWidth: 2 });
-  if (activeLimits.mlw) datasets.push({ label: "Max Landing", data: [{x: chartX(chartBounds.xMin), y: chartY(activeLimits.mlw)}, {x: chartX(chartBounds.xMax), y: chartY(activeLimits.mlw)}], showLine: true, borderColor: "#0078D4", borderDash: [2, 4], pointRadius: 0, borderWidth: 2 });
+  if (activeLimits.mzfw) datasets.push({ label: "Max Zero Fuel", data: [{x: chartX(chartBounds.xMin), y: chartLimitY("mzfw", activeLimits.mzfw)}, {x: chartX(chartBounds.xMax), y: chartLimitY("mzfw", activeLimits.mzfw)}], showLine: true, borderColor: "#d32f2f", borderDash: [8, 5], pointRadius: 0, borderWidth: 2 });
+  if (activeLimits.mlw) datasets.push({ label: "Max Landing", data: [{x: chartX(chartBounds.xMin), y: chartLimitY("mlw", activeLimits.mlw)}, {x: chartX(chartBounds.xMax), y: chartLimitY("mlw", activeLimits.mlw)}], showLine: true, borderColor: "#0078D4", borderDash: [2, 4], pointRadius: 0, borderWidth: 2 });
 
   const unit = getUnit();
   wbChart = new Chart(ctx, {
