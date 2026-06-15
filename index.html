@@ -449,7 +449,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v24</span>
+  <span class="subtitle">Beta v26</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -1428,7 +1428,7 @@ function setConditionRow(prefix, weightLbs, cgIn, momentInLbs) {
   setText(`result_${prefix}_moment`, displayMoment(momentInLbs), unit.momentDec);
 }
 
-function updateKagoshimaLandingAdvisory(towWeightLbs, maxLandingWeightLbs, fuelLbsPerGal) {
+function updateKagoshimaLandingAdvisory(towWeightLbs, landingWeightLbs, maxLandingWeightLbs, fuelLbsPerGal, tripFuelGal) {
   const el = document.getElementById("kagoshimaLandingAdvisory");
   if (!el) return;
 
@@ -1444,17 +1444,36 @@ function updateKagoshimaLandingAdvisory(towWeightLbs, maxLandingWeightLbs, fuelL
     return;
   }
 
-  const excessLbs = Math.max(0, towWeightLbs - maxLandingWeightLbs);
-  const requiredFuelGal = excessLbs / fuelLbsPerGal;
-  const rawMinutes = (requiredFuelGal / 10) * 60;
-  const waitMinutes = excessLbs <= 0 ? 0 : Math.ceil(rawMinutes - 1e-9);
+  const safeTripFuelGal = Math.max(0, tripFuelGal || 0);
+  const tripFuelMinutes = (safeTripFuelGal / 10) * 60;
 
-  const detailText = waitMinutes === 0
-    ? "離陸直後に最大着陸重量以内で着陸可能です。"
-    : `最大着陸重量以内に収めるには、約${fmt(requiredFuelGal, 1)} US galの燃料消費が必要です。`;
+  // Takeoff Conditionから最大着陸重量に収めるために必要な総燃料消費量。
+  const excessAtTakeoffLbs = Math.max(0, towWeightLbs - maxLandingWeightLbs);
+  const requiredFuelFromTakeoffGal = excessAtTakeoffLbs / fuelLbsPerGal;
+  const requiredMinutesFromTakeoff = excessAtTakeoffLbs <= 0 ? 0 : Math.ceil(((requiredFuelFromTakeoffGal / 10) * 60) - 1e-9);
+
+  // 実際の判定表示はLanding Conditionを優先します。
+  // Trip fuel入力後のLanding Conditionが最大着陸重量以内なら、追加待機は0分です。
+  const excessAtLandingLbs = Math.max(0, landingWeightLbs - maxLandingWeightLbs);
+  const additionalFuelGal = excessAtLandingLbs / fuelLbsPerGal;
+  const additionalWaitMinutes = excessAtLandingLbs <= 0 ? 0 : Math.ceil(((additionalFuelGal / 10) * 60) - 1e-9);
+
+  let detailText = "";
+  let resultText = "";
+
+  if (excessAtTakeoffLbs <= 0) {
+    detailText = "Takeoff Conditionが最大着陸重量以内のため、離陸直後から着陸可能です。";
+    resultText = "着陸可能時間：<strong>0分</strong>";
+  } else if (excessAtLandingLbs <= 0) {
+    detailText = `Takeoff Conditionから最大着陸重量以内に収めるには約${fmt(requiredFuelFromTakeoffGal, 1)} US gal（約${requiredMinutesFromTakeoff}分相当）の燃料消費が必要ですが、入力されたTrip fuel ${fmt(safeTripFuelGal, 1)} US gal（約${fmt(tripFuelMinutes, 1)}分相当）消費後のLanding Conditionは最大着陸重量以内です。`;
+    resultText = "追加で必要な着陸待機時間：<strong>0分</strong>";
+  } else {
+    detailText = `入力されたTrip fuel ${fmt(safeTripFuelGal, 1)} US gal（約${fmt(tripFuelMinutes, 1)}分相当）消費後も最大着陸重量を上回っています。最大着陸重量以内に収めるには、さらに約${fmt(additionalFuelGal, 1)} US galの燃料消費が必要です。`;
+    resultText = `追加で必要な着陸待機時間：<strong>${additionalWaitMinutes}分</strong>（燃料消費10 US gal/hで計算）`;
+  }
 
   el.classList.remove("hidden");
-  el.innerHTML = `<strong>Landing after takeoff</strong><br>${detailText}<br>着陸可能時間：<strong>${waitMinutes}分後</strong>から着陸可能（燃料消費10 US gal/hで計算）`;
+  el.innerHTML = `<strong>Landing after takeoff</strong><br>${detailText}<br>${resultText}`;
 }
 
 function calculateWB() {
@@ -1540,7 +1559,7 @@ function calculateWB() {
   setLimitStatus("result_tow_status", towW, "mtow", limits.mtow);
   setLimitStatus("result_ldg_status", ldgW, "mlw", limits.mlw);
 
-  updateKagoshimaLandingAdvisory(towW, limits.mlw, fuelLbsPerGal);
+  updateKagoshimaLandingAdvisory(towW, ldgW, limits.mlw, fuelLbsPerGal, inputState.tripFuelGal);
 
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
