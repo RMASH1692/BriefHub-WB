@@ -449,7 +449,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v27</span>
+  <span class="subtitle">Final v1.0</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -632,7 +632,6 @@
     </table>
     <div id="kagoshimaLandingAdvisory" class="landing-advisory hidden"></div>
   </div>
-
 
   <div class="card" style="margin-top: 25px;">
     <h3>Envelope</h3>
@@ -1312,7 +1311,6 @@ function setInputStep(id, step) {
 
 function applyPresetToForm() {
   const unit = getUnit();
-  const activeLimits = getActiveLimitsLbs();
 
   setInput("preset_frontSeat", getArmDisplayValue("frontSeat"), unit.armDec);
   setInput("preset_rearSeat", getArmDisplayValue("rearSeat"), unit.armDec);
@@ -1428,7 +1426,7 @@ function setConditionRow(prefix, weightLbs, cgIn, momentInLbs) {
   setText(`result_${prefix}_moment`, displayMoment(momentInLbs), unit.momentDec);
 }
 
-function updateKagoshimaLandingAdvisory(towWeightLbs, landingWeightLbs, maxLandingWeightLbs, fuelLbsPerGal, tripFuelGal) {
+function updateKagoshimaLandingAdvisory(landingWeightLbs, maxLandingWeightLbs, fuelLbsPerGal) {
   const el = document.getElementById("kagoshimaLandingAdvisory");
   if (!el) return;
 
@@ -1438,38 +1436,24 @@ function updateKagoshimaLandingAdvisory(towWeightLbs, landingWeightLbs, maxLandi
     return;
   }
 
+  el.classList.remove("hidden");
+
   if (!hasNumber(maxLandingWeightLbs) || !hasNumber(fuelLbsPerGal) || fuelLbsPerGal <= 0) {
-    el.classList.remove("hidden");
     el.innerHTML = "<strong>Landing after takeoff</strong><br>最大着陸重量または燃料係数が未設定のため、計算できません。";
     return;
   }
 
-  const safeTripFuelGal = Math.max(0, tripFuelGal || 0);
-  const tripFuelMinutes = (safeTripFuelGal / 10) * 60;
-  const excessAtTakeoffLbs = Math.max(0, towWeightLbs - maxLandingWeightLbs);
-  const requiredFuelFromTakeoffGal = excessAtTakeoffLbs / fuelLbsPerGal;
-  const requiredMinutesFromTakeoff = excessAtTakeoffLbs <= 0 ? 0 : Math.ceil(((requiredFuelFromTakeoffGal / 10) * 60) - 1e-9);
+  const excessLandingWeightLbs = Math.max(0, landingWeightLbs - maxLandingWeightLbs);
 
-  const excessAtLandingLbs = Math.max(0, landingWeightLbs - maxLandingWeightLbs);
-  const additionalFuelGal = excessAtLandingLbs / fuelLbsPerGal;
-  const additionalWaitMinutes = excessAtLandingLbs <= 0 ? 0 : Math.ceil(((additionalFuelGal / 10) * 60) - 1e-9);
-
-  let detailText = "";
-  let resultText = "";
-
-  if (excessAtTakeoffLbs <= 0) {
-    detailText = "Takeoff Conditionが最大着陸重量以内のため、離陸直後から着陸可能です。";
-    resultText = "着陸可能時間：<strong>0分</strong>";
-  } else if (excessAtLandingLbs <= 0) {
-    detailText = `Takeoff Conditionから最大着陸重量以内に収めるには約${fmt(requiredFuelFromTakeoffGal, 1)} US gal（約${requiredMinutesFromTakeoff}分相当）の燃料消費が必要ですが、入力されたTrip fuel ${fmt(safeTripFuelGal, 1)} US gal（約${fmt(tripFuelMinutes, 1)}分相当）消費後のLanding Conditionは最大着陸重量以内です。`;
-    resultText = "追加で必要な着陸待機時間：<strong>0分</strong>";
-  } else {
-    detailText = `最大着陸重量以内に収めるには、さらに約${fmt(additionalFuelGal, 1)} US galの燃料消費が必要です。`;
-    resultText = `追加で必要な着陸待機時間：<strong>${additionalWaitMinutes}分</strong>（燃料消費10 US gal/hで計算）`;
+  if (excessLandingWeightLbs <= 0) {
+    el.innerHTML = "<strong>Landing after takeoff</strong><br>Landing Conditionが最大着陸重量以内のため、追加の燃料消費は不要です。<br>着陸可能時間：<strong>0分</strong>";
+    return;
   }
 
-  el.classList.remove("hidden");
-  el.innerHTML = `<strong>Landing after takeoff</strong><br>${detailText}<br>${resultText}`;
+  const requiredFuelGal = excessLandingWeightLbs / fuelLbsPerGal;
+  const requiredMinutes = Math.ceil(((requiredFuelGal / 10) * 60) - 1e-9);
+
+  el.innerHTML = `<strong>Landing after takeoff</strong><br>最大着陸重量以内に収めるには、さらに約${fmt(requiredFuelGal, 1)} US galの燃料消費が必要です。<br>追加で必要な着陸待機時間：<strong>${requiredMinutes}分</strong>（燃料消費10 US gal/hで計算）`;
 }
 
 function calculateWB() {
@@ -1555,7 +1539,7 @@ function calculateWB() {
   setLimitStatus("result_tow_status", towW, "mtow", limits.mtow);
   setLimitStatus("result_ldg_status", ldgW, "mlw", limits.mlw);
 
-  updateKagoshimaLandingAdvisory(towW, ldgW, limits.mlw, fuelLbsPerGal, inputState.tripFuelGal);
+  updateKagoshimaLandingAdvisory(ldgW, limits.mlw, fuelLbsPerGal);
 
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
@@ -1620,9 +1604,6 @@ function chartLimitY(limitKey, limitLbs) {
   }
   return chartY(limitLbs);
 }
-
-function chartX(valueIn) { return currentUnit === "metric" ? inToM(valueIn) : valueIn; }
-function chartY(valueLbs) { return currentUnit === "metric" ? lbsToKg(valueLbs) : valueLbs; }
 
 function initChart(p) {
   if (typeof Chart === "undefined") return;
