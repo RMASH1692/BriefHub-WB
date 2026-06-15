@@ -406,7 +406,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v10</span>
+  <span class="subtitle">Beta v11</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -651,8 +651,8 @@
           <th>Qty</th>
           <th>Weight (kg)</th>
           <th>Weight (lbs)</th>
-          <th>Arm / CG (in)</th>
-          <th>Moment (in-lbs)</th>
+          <th id="resultArmHeader">Arm / CG (in)</th>
+          <th id="resultMomentHeader">Moment (in-lbs)</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -825,6 +825,8 @@
 <script>
 const KG_TO_LBS = 2.2046226218;
 const LBS_TO_KG = 1 / KG_TO_LBS;
+const IN_TO_M = 0.0254;
+const M_TO_IN = 1 / IN_TO_M;
 const DEICE_LBS_PER_GAL = 9.2;
 const DEICE_KG_PER_L = 1.1;
 const DEICE_LBS_PER_L = DEICE_KG_PER_L * KG_TO_LBS;
@@ -883,7 +885,7 @@ const AIRCRAFT_PRESETS = {
     inherit: "DA42_TDI",
     inputDefaults: {
       basicEmptyWeightKg: 1353,
-      basicEmptyArm: 95.2756,
+      basicEmptyArmM: 2.4200,
       noseBaggageKg: null,
       cabinBaggageKg: null,
       baggageExtensionKg: null,
@@ -898,7 +900,7 @@ const AIRCRAFT_PRESETS = {
     inherit: "DA42_TDI",
     inputDefaults: {
       basicEmptyWeightKg: 1364,
-      basicEmptyArm: 97.2440,
+      basicEmptyArmM: 2.4700,
       noseBaggageKg: null,
       cabinBaggageKg: null,
       baggageExtensionKg: null,
@@ -913,7 +915,7 @@ const AIRCRAFT_PRESETS = {
     inherit: "DA42_NG",
     inputDefaults: {
       basicEmptyWeightKg: 1461.7,
-      basicEmptyArm: 94.0551,
+      basicEmptyArmM: 2.3890,
       noseBaggageKg: null,
       cabinBaggageKg: null,
       baggageExtensionKg: null,
@@ -928,7 +930,7 @@ const AIRCRAFT_PRESETS = {
     inherit: "DA42_NG_VI",
     inputDefaults: {
       basicEmptyWeightKg: 1531,
-      basicEmptyArm: 96.2598,
+      basicEmptyArmM: 2.4450,
       noseBaggageKg: null,
       cabinBaggageKg: null,
       baggageExtensionKg: null,
@@ -1106,6 +1108,66 @@ function fmt(value, dec = 1) {
 
 function lbsToKg(lbs) { return lbs * LBS_TO_KG; }
 function kgToLbs(kg) { return kg * KG_TO_LBS; }
+function inToM(inches) { return inches * IN_TO_M; }
+function mToIn(meters) { return meters * M_TO_IN; }
+
+function isMetricArmMode(p = currentPreset) {
+  return p && p.statusUnit === "kg";
+}
+
+function getArmDisplayUnit() {
+  return isMetricArmMode() ? "m" : "in";
+}
+
+function armDisplayFromIn(valueIn) {
+  if (valueIn === null || valueIn === undefined || Number.isNaN(valueIn)) return null;
+  return isMetricArmMode() ? inToM(valueIn) : valueIn;
+}
+
+function armInputToIn(id) {
+  const value = getNullableNumber(id);
+  if (value === null) return null;
+  return isMetricArmMode() ? mToIn(value) : value;
+}
+
+function setArmInput(id, valueIn) {
+  setInput(id, armDisplayFromIn(valueIn), isMetricArmMode() ? 3 : 1);
+}
+
+function setArmText(id, valueIn, decIn = 1, decM = 3) {
+  const value = armDisplayFromIn(valueIn);
+  setText(id, value, isMetricArmMode() ? decM : decIn);
+}
+
+function setMomentText(id, valueInLbs) {
+  const value = isMetricArmMode() ? valueInLbs * LBS_TO_KG * IN_TO_M : valueInLbs;
+  setText(id, value, isMetricArmMode() ? 1 : 0);
+}
+
+function updateDisplayUnits(p = currentPreset) {
+  const metric = isMetricArmMode(p);
+  const armUnit = metric ? "m" : "in";
+  const momentUnit = metric ? "kg-m" : "in-lbs";
+  const step = metric ? "0.001" : "0.1";
+
+  [
+    "preset_frontSeat", "preset_rearSeat", "preset_noseBaggage",
+    "preset_cabinBaggage", "preset_baggageExtension", "preset_fuel",
+    "preset_deice", "bew_arm"
+  ].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.step = step;
+    const unit = input.parentElement ? input.parentElement.querySelector(".unit") : null;
+    if (unit) unit.innerText = armUnit;
+  });
+
+  const armHeader = document.getElementById("resultArmHeader");
+  if (armHeader) armHeader.innerText = `Arm / CG (${armUnit})`;
+
+  const momentHeader = document.getElementById("resultMomentHeader");
+  if (momentHeader) momentHeader.innerText = `Moment (${momentUnit})`;
+}
 
 function getNumber(id) { return parseFloat(document.getElementById(id).value) || 0; }
 function getNullableNumber(id) {
@@ -1240,7 +1302,7 @@ function bindPresetInputs() {
   ].forEach(([id, key]) => {
     document.getElementById(id).addEventListener("input", () => {
       if (!currentPreset) return;
-      currentPreset.arms[key] = getNullableNumber(id);
+      currentPreset.arms[key] = armInputToIn(id);
       refreshArmBadges();
       calculateWB();
     });
@@ -1264,14 +1326,15 @@ function updateLimitsFromPresetInputs() {
 function applyPreset(p) {
   document.getElementById("selectedAircraftLabel").innerText = p.label;
   document.getElementById("selectedModeLabel").innerText = p.mode || "";
+  updateDisplayUnits(p);
 
-  setInput("preset_frontSeat", p.arms.frontSeat, 1);
-  setInput("preset_rearSeat", p.arms.rearSeat, 1);
-  setInput("preset_noseBaggage", p.arms.noseBaggage, 1);
-  setInput("preset_cabinBaggage", p.arms.cabinBaggage, 1);
-  setInput("preset_baggageExtension", p.arms.baggageExtension, 1);
-  setInput("preset_fuel", p.arms.fuel, 1);
-  setInput("preset_deice", p.arms.deice, 1);
+  setArmInput("preset_frontSeat", p.arms.frontSeat);
+  setArmInput("preset_rearSeat", p.arms.rearSeat);
+  setArmInput("preset_noseBaggage", p.arms.noseBaggage);
+  setArmInput("preset_cabinBaggage", p.arms.cabinBaggage);
+  setArmInput("preset_baggageExtension", p.arms.baggageExtension);
+  setArmInput("preset_fuel", p.arms.fuel);
+  setArmInput("preset_deice", p.arms.deice);
 
   setInput("preset_mtow_lbs", p.limits.mtowLbs, 1);
   setInput("preset_mtow_kg", p.limits.mtowLbs ? lbsToKg(p.limits.mtowLbs) : null, 1);
@@ -1286,11 +1349,13 @@ function applyPreset(p) {
   const bewLbs = d.basicEmptyWeightLbs !== undefined && d.basicEmptyWeightLbs !== null
     ? d.basicEmptyWeightLbs
     : (d.basicEmptyWeightKg !== undefined && d.basicEmptyWeightKg !== null ? kgToLbs(d.basicEmptyWeightKg) : p.basicEmpty.weightLbs);
-  const bewArm = d.basicEmptyArm !== undefined && d.basicEmptyArm !== null ? d.basicEmptyArm : p.basicEmpty.arm;
+  const bewArm = d.basicEmptyArmM !== undefined && d.basicEmptyArmM !== null
+    ? mToIn(d.basicEmptyArmM)
+    : (d.basicEmptyArm !== undefined && d.basicEmptyArm !== null ? d.basicEmptyArm : p.basicEmpty.arm);
 
   setInput("bew_lbs", bewLbs, 1);
   setInput("bew_kg", bewLbs ? lbsToKg(bewLbs) : null, 1);
-  setInput("bew_arm", bewArm, 1);
+  setArmInput("bew_arm", bewArm);
 
   resetVariableInputs();
   applyDefaultInputs(p);
@@ -1343,7 +1408,7 @@ function calculateWB() {
   const deiceLbsPerL = currentPreset.deice.lbsPerL || 0;
 
   const bewW = getNumber("bew_lbs");
-  const bewArm = getNumber("bew_arm");
+  const bewArm = armInputToIn("bew_arm") || 0;
   const bewM = moment(bewW, bewArm);
 
   const frontLW = getNumber("frontL_lbs");
@@ -1377,67 +1442,67 @@ function calculateWB() {
 
   setText("res_bew_kg", lbsToKg(bewW), 1);
   setText("res_bew_lbs", bewW, 1);
-  setText("res_bew_arm", bewArm, 1);
-  setText("res_bew_moment", bewM, 0);
+  setArmText("res_bew_arm", bewArm, 1);
+  setMomentText("res_bew_moment", bewM);
 
   setText("res_frontL_kg", lbsToKg(frontLW), 1);
   setText("res_frontL_lbs", frontLW, 1);
-  setText("res_frontL_arm", a.frontSeat, 1);
-  setText("res_frontL_moment", frontLM, 0);
+  setArmText("res_frontL_arm", a.frontSeat, 1);
+  setMomentText("res_frontL_moment", frontLM);
 
   setText("res_frontR_kg", lbsToKg(frontRW), 1);
   setText("res_frontR_lbs", frontRW, 1);
-  setText("res_frontR_arm", a.frontSeat, 1);
-  setText("res_frontR_moment", frontRM, 0);
+  setArmText("res_frontR_arm", a.frontSeat, 1);
+  setMomentText("res_frontR_moment", frontRM);
 
   setText("res_rearL_kg", lbsToKg(rearLW), 1);
   setText("res_rearL_lbs", rearLW, 1);
-  setText("res_rearL_arm", a.rearSeat, 1);
-  setText("res_rearL_moment", rearLM, 0);
+  setArmText("res_rearL_arm", a.rearSeat, 1);
+  setMomentText("res_rearL_moment", rearLM);
 
   setText("res_rearR_kg", lbsToKg(rearRW), 1);
   setText("res_rearR_lbs", rearRW, 1);
-  setText("res_rearR_arm", a.rearSeat, 1);
-  setText("res_rearR_moment", rearRM, 0);
+  setArmText("res_rearR_arm", a.rearSeat, 1);
+  setMomentText("res_rearR_moment", rearRM);
 
   setText("res_nose_kg", lbsToKg(noseW), 1);
   setText("res_nose_lbs", noseW, 1);
-  setText("res_nose_arm", a.noseBaggage, 1);
-  setText("res_nose_moment", noseM, 0);
+  setArmText("res_nose_arm", a.noseBaggage, 1);
+  setMomentText("res_nose_moment", noseM);
 
   setText("res_cabin_kg", lbsToKg(cabinW), 1);
   setText("res_cabin_lbs", cabinW, 1);
-  setText("res_cabin_arm", a.cabinBaggage, 1);
-  setText("res_cabin_moment", cabinM, 0);
+  setArmText("res_cabin_arm", a.cabinBaggage, 1);
+  setMomentText("res_cabin_moment", cabinM);
 
   setText("res_extension_kg", lbsToKg(extensionW), 1);
   setText("res_extension_lbs", extensionW, 1);
-  setText("res_extension_arm", a.baggageExtension, 1);
-  setText("res_extension_moment", extensionM, 0);
+  setArmText("res_extension_arm", a.baggageExtension, 1);
+  setMomentText("res_extension_moment", extensionM);
 
   document.getElementById("res_deice_qty").innerText = `${fmt(getNumber("deice_L"), 1)} L / ${fmt(getNumber("deice_gal"), 1)} US gal`;
   setText("res_deice_kg", lbsToKg(deiceW), 1);
   setText("res_deice_lbs", deiceW, 1);
-  setText("res_deice_arm", a.deice, 1);
-  setText("res_deice_moment", deiceM, 0);
+  setArmText("res_deice_arm", a.deice, 1);
+  setMomentText("res_deice_moment", deiceM);
 
   setText("res_mainFuel_qty", getNumber("mainFuel_gal"), 1);
   setText("res_mainFuel_kg", lbsToKg(mainFuelW), 1);
   setText("res_mainFuel_lbs", mainFuelW, 1);
-  setText("res_mainFuel_arm", a.fuel, 1);
-  setText("res_mainFuel_moment", mainFuelM, 0);
+  setArmText("res_mainFuel_arm", a.fuel, 1);
+  setMomentText("res_mainFuel_moment", mainFuelM);
 
   setText("res_taxiFuel_qty", getNumber("taxiFuel_gal"), 1);
   setText("res_taxiFuel_kg", -lbsToKg(taxiFuelW), 1);
   setText("res_taxiFuel_lbs", -taxiFuelW, 1);
-  setText("res_taxiFuel_arm", a.fuel, 1);
-  setText("res_taxiFuel_moment", -taxiFuelM, 0);
+  setArmText("res_taxiFuel_arm", a.fuel, 1);
+  setMomentText("res_taxiFuel_moment", -taxiFuelM);
 
   setText("res_tripFuel_qty", getNumber("tripFuel_gal"), 1);
   setText("res_tripFuel_kg", -lbsToKg(tripFuelW), 1);
   setText("res_tripFuel_lbs", -tripFuelW, 1);
-  setText("res_tripFuel_arm", a.fuel, 1);
-  setText("res_tripFuel_moment", -tripFuelM, 0);
+  setArmText("res_tripFuel_arm", a.fuel, 1);
+  setMomentText("res_tripFuel_moment", -tripFuelM);
 
   const zfwW = bewW + frontLW + frontRW + rearLW + rearRW + noseW + cabinW + extensionW + deiceW;
   const zfwM = bewM + frontLM + frontRM + rearLM + rearRM + noseM + cabinM + extensionM + deiceM;
@@ -1457,23 +1522,23 @@ function calculateWB() {
 
   setText("result_zfw_kg", lbsToKg(zfwW), 1);
   setText("result_zfw_lbs", zfwW, 1);
-  setText("result_zfw_cg", zfwCG, 2);
-  setText("result_zfw_moment", zfwM, 0);
+  setArmText("result_zfw_cg", zfwCG, 2, 3);
+  setMomentText("result_zfw_moment", zfwM);
 
   setText("result_ramp_kg", lbsToKg(rampW), 1);
   setText("result_ramp_lbs", rampW, 1);
-  setText("result_ramp_cg", rampCG, 2);
-  setText("result_ramp_moment", rampM, 0);
+  setArmText("result_ramp_cg", rampCG, 2, 3);
+  setMomentText("result_ramp_moment", rampM);
 
   setText("result_tow_kg", lbsToKg(towW), 1);
   setText("result_tow_lbs", towW, 1);
-  setText("result_tow_cg", towCG, 2);
-  setText("result_tow_moment", towM, 0);
+  setArmText("result_tow_cg", towCG, 2, 3);
+  setMomentText("result_tow_moment", towM);
 
   setText("result_ldg_kg", lbsToKg(ldgW), 1);
   setText("result_ldg_lbs", ldgW, 1);
-  setText("result_ldg_cg", ldgCG, 2);
-  setText("result_ldg_moment", ldgM, 0);
+  setArmText("result_ldg_cg", ldgCG, 2, 3);
+  setMomentText("result_ldg_moment", ldgM);
 
   setLimitStatus("result_zfw_status", zfwW, limits.mzfwLbs);
   setLimitStatus("result_ramp_status", rampW, limits.mtowLbs);
@@ -1482,7 +1547,7 @@ function calculateWB() {
 
   document.getElementById("summary_tow").innerText = `${fmt(towW, 1)} lbs`;
   document.getElementById("summary_ldg").innerText = `${fmt(ldgW, 1)} lbs`;
-  document.getElementById("summary_cg").innerText = `${fmt(towCG, 2)} in`;
+  document.getElementById("summary_cg").innerText = `${fmt(armDisplayFromIn(towCG), isMetricArmMode() ? 3 : 2)} ${getArmDisplayUnit()}`;
 
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
