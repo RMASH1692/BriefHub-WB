@@ -449,7 +449,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v26</span>
+  <span class="subtitle">Beta v27</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -1446,14 +1446,10 @@ function updateKagoshimaLandingAdvisory(towWeightLbs, landingWeightLbs, maxLandi
 
   const safeTripFuelGal = Math.max(0, tripFuelGal || 0);
   const tripFuelMinutes = (safeTripFuelGal / 10) * 60;
-
-  // Takeoff Conditionから最大着陸重量に収めるために必要な総燃料消費量。
   const excessAtTakeoffLbs = Math.max(0, towWeightLbs - maxLandingWeightLbs);
   const requiredFuelFromTakeoffGal = excessAtTakeoffLbs / fuelLbsPerGal;
   const requiredMinutesFromTakeoff = excessAtTakeoffLbs <= 0 ? 0 : Math.ceil(((requiredFuelFromTakeoffGal / 10) * 60) - 1e-9);
 
-  // 実際の判定表示はLanding Conditionを優先します。
-  // Trip fuel入力後のLanding Conditionが最大着陸重量以内なら、追加待機は0分です。
   const excessAtLandingLbs = Math.max(0, landingWeightLbs - maxLandingWeightLbs);
   const additionalFuelGal = excessAtLandingLbs / fuelLbsPerGal;
   const additionalWaitMinutes = excessAtLandingLbs <= 0 ? 0 : Math.ceil(((additionalFuelGal / 10) * 60) - 1e-9);
@@ -1468,7 +1464,7 @@ function updateKagoshimaLandingAdvisory(towWeightLbs, landingWeightLbs, maxLandi
     detailText = `Takeoff Conditionから最大着陸重量以内に収めるには約${fmt(requiredFuelFromTakeoffGal, 1)} US gal（約${requiredMinutesFromTakeoff}分相当）の燃料消費が必要ですが、入力されたTrip fuel ${fmt(safeTripFuelGal, 1)} US gal（約${fmt(tripFuelMinutes, 1)}分相当）消費後のLanding Conditionは最大着陸重量以内です。`;
     resultText = "追加で必要な着陸待機時間：<strong>0分</strong>";
   } else {
-    detailText = `入力されたTrip fuel ${fmt(safeTripFuelGal, 1)} US gal（約${fmt(tripFuelMinutes, 1)}分相当）消費後も最大着陸重量を上回っています。最大着陸重量以内に収めるには、さらに約${fmt(additionalFuelGal, 1)} US galの燃料消費が必要です。`;
+    detailText = `最大着陸重量以内に収めるには、さらに約${fmt(additionalFuelGal, 1)} US galの燃料消費が必要です。`;
     resultText = `追加で必要な着陸待機時間：<strong>${additionalWaitMinutes}分</strong>（燃料消費10 US gal/hで計算）`;
   }
 
