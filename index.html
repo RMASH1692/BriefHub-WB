@@ -433,7 +433,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v20</span>
+  <span class="subtitle">Beta v21</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -470,7 +470,7 @@
     <h3>JFOU Password</h3>
     <div class="password-box">
       <input type="password" id="jfouPassword" placeholder="Password">
-      <button type="button" class="primary-button" onclick="unlockJFOU()">解除</button>
+      <button type="button" class="primary-button" onclick="unlockJFOU()">Enter</button>
     </div>
     <div id="passwordError" class="error-text hidden">パスワードが違います。</div>
   </div>
@@ -597,8 +597,8 @@
       </thead>
       <tbody>
         <tr><td>Basic Empty Weight</td><td class="blank-cell">-</td><td id="res_bew_weight">0</td><td id="res_bew_arm">0</td><td id="res_bew_moment">0</td><td class="blank-cell">-</td></tr>
-        <tr><td>Front seat L</td><td class="blank-cell">-</td><td id="res_frontL_weight">0</td><td id="res_frontL_arm">0</td><td id="res_frontL_moment">0</td><td class="blank-cell">-</td></tr>
-        <tr><td>Front seat R</td><td class="blank-cell">-</td><td id="res_frontR_weight">0</td><td id="res_frontR_arm">0</td><td id="res_frontR_moment">0</td><td class="blank-cell">-</td></tr>
+        <tr><td>Pilot seat</td><td class="blank-cell">-</td><td id="res_frontL_weight">0</td><td id="res_frontL_arm">0</td><td id="res_frontL_moment">0</td><td class="blank-cell">-</td></tr>
+        <tr><td>Front PAX seat</td><td class="blank-cell">-</td><td id="res_frontR_weight">0</td><td id="res_frontR_arm">0</td><td id="res_frontR_moment">0</td><td class="blank-cell">-</td></tr>
         <tr><td>Rear seat L</td><td class="blank-cell">-</td><td id="res_rearL_weight">0</td><td id="res_rearL_arm">0</td><td id="res_rearL_moment">0</td><td class="blank-cell">-</td></tr>
         <tr><td>Rear seat R</td><td class="blank-cell">-</td><td id="res_rearR_weight">0</td><td id="res_rearR_arm">0</td><td id="res_rearR_moment">0</td><td class="blank-cell">-</td></tr>
         <tr><td>Nose baggage</td><td class="blank-cell">-</td><td id="res_nose_weight">0</td><td id="res_nose_arm">0</td><td id="res_nose_moment">0</td><td class="blank-cell">-</td></tr>
@@ -729,7 +729,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
-    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1353,
@@ -747,7 +746,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
-    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1364,
@@ -765,7 +763,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
-    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsKg: {},
     inputDefaults: {
       basicEmptyWeightKg: 1461.7,
@@ -783,7 +780,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "metric",
     allowUnitSwitch: false,
     inherit: "DA42_NG_VI",
-    // 個別制限値を設定する場合は kg で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsKg: { mtow: 1999, mlw: 1999, mzfw: 1835 },
     inputDefaults: {
       basicEmptyWeightKg: 1531,
@@ -801,7 +797,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3147.1,
@@ -819,7 +814,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3276.7,
@@ -837,7 +831,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 3214.4,
@@ -855,7 +848,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_NG_VI",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: { mtow: 4407, mlw: 4407, mzfw: 4045 },
     inputDefaults: {
       basicEmptyWeightLbs: 3406.1,
@@ -873,7 +865,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 2984.5,
@@ -891,7 +882,6 @@ const AIRCRAFT_PRESETS = {
     defaultUnit: "imperial",
     allowUnitSwitch: false,
     inherit: "DA42_TDI",
-    // 個別制限値を設定する場合は lbs で入力: { mtow: 0, mlw: 0, mzfw: 0 }
     limitsLbs: {},
     inputDefaults: {
       basicEmptyWeightLbs: 2974.4,
@@ -995,7 +985,6 @@ function normalizePreset(p) {
   p.limitsLbs = p.limitsLbs || {};
   p.limitsKg = p.limitsKg || {};
 
-  // limitsKg / limitsLbs のどちらか一方だけを入力しても、内部計算用にもう一方を補完します。
   Object.keys(p.limitsKg).forEach(key => {
     if ((p.limitsLbs[key] === undefined || p.limitsLbs[key] === null) && hasNumber(p.limitsKg[key])) p.limitsLbs[key] = kgToLbs(p.limitsKg[key]);
   });
@@ -1039,13 +1028,11 @@ function syncLimitPairFromLbs(p) {
 function applyIndividualLimitOverride(resolved, originalPreset) {
   if (!originalPreset || !originalPreset.inherit) return;
 
-  // JA機体側で limitsKg を指定した場合は、継承元のlbs制限値よりkg側を優先します。
   if (hasOwnLimitObject(originalPreset, "limitsKg")) {
     syncLimitPairFromKg(resolved);
     return;
   }
 
-  // JA機体側で limitsLbs を指定した場合は、継承元のkg制限値よりlbs側を優先します。
   if (hasOwnLimitObject(originalPreset, "limitsLbs")) {
     syncLimitPairFromLbs(resolved);
   }
