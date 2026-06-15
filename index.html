@@ -409,22 +409,22 @@
     <p class="screen-note">使用する機種を選択してください。</p>
 
     <div class="select-grid">
-      <button class="select-button" onclick="selectPublicAircraft('DA42_TDI')">
+      <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_TDI')">
         <div class="main">DA42 TDI</div>
         <div class="sub">通常W&Bへ進みます</div>
       </button>
 
-      <button class="select-button" onclick="selectPublicAircraft('DA42_NG')">
+      <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_NG')">
         <div class="main">DA42 NG</div>
         <div class="sub">通常W&Bへ進みます</div>
       </button>
 
-      <button class="select-button" onclick="selectPublicAircraft('DA42_NG_VI')">
+      <button type="button" class="select-button" onclick="selectPublicAircraft('DA42_NG_VI')">
         <div class="main">DA42 NG-Ⅵ</div>
         <div class="sub">通常W&Bへ進みます</div>
       </button>
 
-      <button class="select-button" onclick="showPasswordScreen()">
+      <button type="button" class="select-button" onclick="showPasswordScreen()">
         <div class="main">JFOU</div>
         <div class="sub">パスワードが必要です。</div>
       </button>
@@ -434,14 +434,14 @@
 
 <section id="passwordScreen" class="hidden">
   <div class="toolbar">
-    <button class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
+    <button type="button" class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
   </div>
 
   <div class="card">
     <h3>JFOU Password</h3>
     <div class="password-box">
       <input type="password" id="jfouPassword" placeholder="Password">
-      <button class="primary-button" onclick="unlockJFOU()">解除</button>
+      <button type="button" class="primary-button" onclick="unlockJFOU()">解除</button>
     </div>
     <div id="passwordError" class="error-text hidden">パスワードが違います。</div>
   </div>
@@ -449,7 +449,7 @@
 
 <section id="jfouAircraftScreen" class="hidden">
   <div class="toolbar">
-    <button class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
+    <button type="button" class="back-button" onclick="showScreen('modelSelectScreen')">← Back</button>
   </div>
 
   <div class="card">
@@ -457,31 +457,31 @@
 
     <div class="base-label">福島</div>
     <div class="select-grid">
-      <button class="select-button" onclick="selectJFOUAircraft('JA52DA')"><div class="main">JA52DA</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA53DA')"><div class="main">JA53DA</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA55DA')"><div class="main">JA55DA</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA56DA')"><div class="main">JA56DA</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA52DA')"><div class="main">JA52DA</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA53DA')"><div class="main">JA53DA</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA55DA')"><div class="main">JA55DA</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA56DA')"><div class="main">JA56DA</div></button>
     </div>
 
     <div class="base-label">鹿児島</div>
     <div class="select-grid">
-      <button class="select-button" onclick="selectJFOUAircraft('JA224T')"><div class="main">JA224T</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA926T')"><div class="main">JA926T</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA999U')"><div class="main">JA999U</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA11HA')"><div class="main">JA11HA</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA224T')"><div class="main">JA224T</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA926T')"><div class="main">JA926T</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA999U')"><div class="main">JA999U</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA11HA')"><div class="main">JA11HA</div></button>
     </div>
 
     <div class="base-label">仙台</div>
     <div class="select-grid">
-      <button class="select-button" onclick="selectJFOUAircraft('JA666C')"><div class="main">JA666C</div></button>
-      <button class="select-button" onclick="selectJFOUAircraft('JA666D')"><div class="main">JA666D</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA666C')"><div class="main">JA666C</div></button>
+      <button type="button" class="select-button" onclick="selectJFOUAircraft('JA666D')"><div class="main">JA666D</div></button>
     </div>
   </div>
 </section>
 
 <section id="calculatorScreen" class="hidden">
   <div class="toolbar">
-    <button class="back-button" onclick="backFromCalculator()">← Back</button>
+    <button type="button" class="back-button" onclick="backFromCalculator()">← Back</button>
     <div class="aircraft-chip">
       <strong id="selectedAircraftLabel">Aircraft</strong>
       <span class="subtitle" id="selectedModeLabel"></span>
@@ -841,30 +841,43 @@ function backFromCalculator() {
 
 function cloneObject(obj) { return JSON.parse(JSON.stringify(obj)); }
 
+function mergeObject(base, override) {
+  const result = cloneObject(base || {});
+  const src = override || {};
+  Object.keys(src).forEach(function(key) {
+    result[key] = src[key];
+  });
+  return result;
+}
+
 function resolvePreset(key) {
   const preset = AIRCRAFT_PRESETS[key];
   if (!preset) return null;
   if (!preset.inherit) return cloneObject(preset);
 
   const base = cloneObject(AIRCRAFT_PRESETS[preset.inherit]);
-  return {
-    ...base,
-    ...preset,
-    arms: { ...base.arms, ...(preset.arms || {}) },
-    limits: { ...base.limits, ...(preset.limits || {}) },
-    fuel: { ...base.fuel, ...(preset.fuel || {}) },
-    deice: { ...base.deice, ...(preset.deice || {}) },
-    basicEmpty: { ...base.basicEmpty, ...(preset.basicEmpty || {}) },
-    envelope: preset.envelope || base.envelope,
-    chart: preset.chart || base.chart
-  };
+  const resolved = mergeObject(base, preset);
+
+  resolved.arms = mergeObject(base.arms, preset.arms);
+  resolved.limits = mergeObject(base.limits, preset.limits);
+  resolved.fuel = mergeObject(base.fuel, preset.fuel);
+  resolved.deice = mergeObject(base.deice, preset.deice);
+  resolved.basicEmpty = mergeObject(base.basicEmpty, preset.basicEmpty);
+  resolved.envelope = preset.envelope || base.envelope;
+  resolved.chart = preset.chart || base.chart;
+
+  return resolved;
 }
 
 function openCalculator(key) {
   currentPreset = resolvePreset(key);
   if (!currentPreset) { alert("Preset not found."); return; }
-  applyPreset(currentPreset);
+
+  // iPhone Safari対策：非表示状態のcanvasでChart.jsを初期化すると
+  // 画面遷移前に処理が止まることがあるため、先に画面を表示する。
   showScreen("calculatorScreen");
+
+  applyPreset(currentPreset);
   calculateWB();
 }
 
