@@ -81,6 +81,26 @@
     margin: -5px 0 18px;
   }
 
+  .jfou-notice {
+    text-align: center;
+    color: var(--text-sub);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: -4px auto 18px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .jfou-notice a {
+    color: var(--primary);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .jfou-notice a:hover { text-decoration: underline; }
+
   .select-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -431,7 +451,7 @@
 
 <h2 class="main-title">
   DA42 Weight & Balance Calculator
-  <span class="subtitle">Beta v15</span>
+  <span class="subtitle">Beta v16</span>
 </h2>
 
 <section id="modelSelectScreen">
@@ -481,6 +501,7 @@
 
   <div class="card">
     <h3>Select JFOU Aircraft</h3>
+    <p class="jfou-notice">Basic Empty WeightやArmが変更になった際は、下記メールアドレスにご連絡ください。<br><a href="mailto:support@aviationbrief.jp">support@aviationbrief.jp</a></p>
 
     <div class="base-label">福島</div>
     <div class="select-grid">
@@ -685,8 +706,9 @@ const AIRCRAFT_PRESETS = {
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
     inputDefaults: {},
+    envelopeType: "TDI",
     envelope: [],
-    chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
+    chart: { xMin: 92.0, xMax: 98.5, yMin: 2500, yMax: 4500 }
   },
 
   DA42_NG: {
@@ -702,11 +724,9 @@ const AIRCRAFT_PRESETS = {
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
     inputDefaults: {},
-    envelope: [
-      {x: 92.52, y: 3197}, {x: 92.52, y: 3236}, {x: 95.20, y: 4189},
-      {x: 97.64, y: 4189}, {x: 97.64, y: 3748}, {x: 96.61, y: 3197}, {x: 92.52, y: 3197}
-    ],
-    chart: { xMin: 92.0, xMax: 98.0, yMin: 3100, yMax: 4200 }
+    envelopeType: "NG",
+    envelope: [],
+    chart: { xMin: 92.0, xMax: 98.5, yMin: 3100, yMax: 4500 }
   },
 
   DA42_NG_VI: {
@@ -722,8 +742,9 @@ const AIRCRAFT_PRESETS = {
     deice: { lbsPerL: DEICE_LBS_PER_L, lbsPerGal: DEICE_LBS_PER_GAL },
     basicEmpty: { weightLbs: null, armIn: null },
     inputDefaults: {},
+    envelopeType: "NG",
     envelope: [],
-    chart: { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 }
+    chart: { xMin: 92.0, xMax: 98.5, yMin: 3100, yMax: 4500 }
   },
 
   JA52DA: {
@@ -1465,6 +1486,41 @@ function calculateWB() {
   updateChart(zfwCG, zfwW, rampCG, rampW, towCG, towW, ldgCG, ldgW);
 }
 
+function buildEnvelopePoints(p, activeLimits) {
+  const mtow = activeLimits && hasNumber(activeLimits.mtow)
+    ? activeLimits.mtow
+    : (p.limitsLbs ? p.limitsLbs.mtow : null);
+
+  if (!hasNumber(mtow)) return p.envelope || [];
+
+  if (p.envelopeType === "TDI") {
+    return [
+      { x: 92.52, y: 2756 },
+      { x: 92.52, y: 3236 },
+      { x: 94.49, y: mtow },
+      { x: 98.03, y: mtow },
+      { x: 98.03, y: 3527 },
+      { x: 95.28, y: 2756 },
+      { x: 92.52, y: 2756 }
+    ];
+  }
+
+  if (p.envelopeType === "NG") {
+    const forwardMtowArm = mtow > 4300 ? 95.83 : 95.20;
+    return [
+      { x: 92.52, y: 3197 },
+      { x: 92.52, y: 3236 },
+      { x: forwardMtowArm, y: mtow },
+      { x: 97.64, y: mtow },
+      { x: 97.64, y: 3748 },
+      { x: 96.61, y: 3197 },
+      { x: 92.52, y: 3197 }
+    ];
+  }
+
+  return p.envelope || [];
+}
+
 function chartX(valueIn) { return currentUnit === "metric" ? inToM(valueIn) : valueIn; }
 function chartY(valueLbs) { return currentUnit === "metric" ? lbsToKg(valueLbs) : valueLbs; }
 
@@ -1477,7 +1533,7 @@ function initChart(p) {
 
   const chartBounds = p.chart || { xMin: 80, xMax: 110, yMin: 2500, yMax: 4500 };
   const activeLimits = getActiveLimitsLbs();
-  const envelopeData = (p.envelope || []).map(point => ({ x: chartX(point.x), y: chartY(point.y) }));
+  const envelopeData = buildEnvelopePoints(p, activeLimits).map(point => ({ x: chartX(point.x), y: chartY(point.y) }));
   const datasets = [
     { label: "Envelope", data: envelopeData, showLine: true, borderColor: "#334155", borderWidth: 4, pointRadius: 0, fill: false, tension: 0 },
     { label: "Flight States", data: [], backgroundColor: ["orange", "purple", "green", "blue"], borderColor: "black", borderWidth: 1, pointRadius: 6 }
